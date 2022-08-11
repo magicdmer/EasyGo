@@ -1,3 +1,5 @@
+[点我阅读中文介绍](README.zh-CN.md)
+
 # EasyGo Launcher
 ## Introduction
 This is a quick launcher tool , support c++, python and e language plugin, it borns of wox launcher:
@@ -11,5 +13,3 @@ This is a quick launcher tool , support c++, python and e language plugin, it bo
 **plugin**: EasyGo's plugins, the plugin format `.plugin` is `zip`
 
 **plugin-sources**:  c++ or e language codes, the python plugin code can find in the plugin folder
-
-[中文介绍](README.zh-CN.md)
