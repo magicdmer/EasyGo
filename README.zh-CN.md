@@ -34,4 +34,7 @@ Wox官网：http://www.wox.one/
 **plugin-sources**:  这个里面是插件源码，主要是c++和易语言的，因为python本身就是源码，可以解压看
 
 
+## 帮助文档
+1. 可以直接查看 github 上的 wiki 分类
+2. 查看压缩包类的 mht 文档
 
