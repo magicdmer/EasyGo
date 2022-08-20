@@ -1,0 +1,110 @@
+{
+    "count": 13,
+    "plugins": [
+        {
+            "author": "Michikora",
+            "description": "A simple Colors viewer with python3.",
+            "id": "98E708098AD643A4954D8451244D92AD",
+            "name": "ColorS",
+            "type": "python",
+            "version": "1.0.7"
+        },
+        {
+            "author": "magicdmer",
+            "description": "一个简单的记事本",
+            "id": "14B0EBB2FE874B0DB07400486FE68F61",
+            "name": "随心记",
+            "type": "c++",
+            "version": "1.0.0"
+        },
+        {
+            "author": "cmaybon",
+            "description": "Ctrl+F for your entire screen.",
+            "id": "DE23F6BA808C434DBF61F2733C2A2297",
+            "name": "FindText",
+            "type": "python",
+            "version": "1.1.0"
+        },
+        {
+            "author": "magicdmer",
+            "description": "磁链转bt种子",
+            "id": "CB7471CF435946B3A9E8159320C801F8",
+            "name": "magnet2torrent",
+            "type": "python",
+            "version": "1.0.0"
+        },
+        {
+            "author": "panda",
+            "description": "search ip with python3.",
+            "id": "DF1DFF3CD1A747CAA990416AEC16621E",
+            "name": "ipsearch",
+            "type": "python",
+            "version": "1.0.0"
+        },
+        {
+            "author": "magicdmer",
+            "description": "用来对进程列表进行查看和关闭操作.",
+            "id": "C1E188526B6E48579A3B92E96A478EFD",
+            "name": "ProcessManager",
+            "type": "python",
+            "version": "1.0.0"
+        },
+        {
+            "author": "RomanKornev",
+            "description": "Advanced calculator with formatting and autocomplete",
+            "id": "a246dac93d45486f96b985669557846c",
+            "name": "PythonCalculator",
+            "type": "python",
+            "version": "1.1.1"
+        },
+        {
+            "author": "JingQiSu",
+            "description": "A simple recalling app",
+            "id": "97303f6f2b70e5a965c8445f456920d3",
+            "name": "Recall",
+            "type": "python",
+            "version": "1.0.0"
+        },
+        {
+            "author": "panda",
+            "description": "switchwindows with python3.",
+            "id": "8BF2E3BFC25E47E6B912EFB289634D12",
+            "name": "SwitchWindows",
+            "type": "python",
+            "version": "1.1.0"
+        },
+        {
+            "author": "Edris Tavoosi",
+            "description": "Displays basic information about memory, cpu, disk, battery and more.",
+            "id": "AAD2C231084D6632B66FE0C79D62C666",
+            "name": "SystemStats",
+            "type": "python",
+            "version": "1.1.0"
+        },
+        {
+            "author": "magicdmer",
+            "description": "ico和png图片互转",
+            "id": "8B3C65CDD23444DAADC937276C5A0EBA",
+            "name": "图片格式转换",
+            "type": "python",
+            "version": "1.1.0"
+        },
+        {
+            "author": "magicdmer",
+            "description": "小鸡词典查询",
+            "id": "14B0EBB2FE874B0DB07400476FE68F60",
+            "name": "小鸡词典",
+            "type": "e",
+            "version": "1.0.0"
+        },
+        {
+            "author": "magicdmer",
+            "description": "生成时间戳，转换时间戳",
+            "id": "82B3B9BC945346A3938D6095DAFFF432",
+            "name": "时间戳",
+            "type": "python",
+            "version": "1.0.0"
+        }
+    ],
+    "version": "1.9.3"
+}
