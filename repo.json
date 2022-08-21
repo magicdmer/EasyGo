@@ -79,7 +79,7 @@
             "id": "AAD2C231084D6632B66FE0C79D62C666",
             "name": "SystemStats",
             "type": "python",
-            "version": "1.1.0"
+            "version": "1.1.1"
         },
         {
             "author": "magicdmer",
