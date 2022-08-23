@@ -1,5 +1,5 @@
 {
-    "count": 15,
+    "count": 16,
     "plugins": [
         {
             "author": "Michikora",
@@ -120,6 +120,14 @@
             "name": "SteamLAUNCHER",
             "type": "python",
             "version": "1.1.5"
+        },
+        {
+            "author": "Wayne Custaf Laqinoa Ferdon",
+            "description": "从PATH环境变量包含的文件夹中搜索文件",
+            "id": "FBCFED0795A937344D76D787F9D2CFC5",
+            "name": "Where",
+            "type": "python",
+            "version": "1.0.0"
         }
     ],
     "version": "1.9.3.2"
