@@ -13,3 +13,7 @@ This is a quick launcher tool , support c++, python and e language plugin, it bo
 **plugin**: EasyGo's plugins, the plugin format `.plugin` is `zip`
 
 **plugin-sources**:  c++ or e language codes, the python plugin code can find in the plugin folder
+
+## communication
+1. Discussions
+2. https://gitter.im/magicdmer/EasyGo
