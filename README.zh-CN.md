@@ -38,3 +38,8 @@ Wox官网：http://www.wox.one/
 1. 可以直接查看 github 上的 wiki 分类
 2. 查看压缩包类的 mht 文档
 
+## 交流
+1. 关于里面的QQ群
+2. 小众软件论坛
+3. https://gitter.im/magicdmer/EasyGo
+4. Discussions
