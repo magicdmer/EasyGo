@@ -2,6 +2,14 @@
     "count": 16,
     "plugins": [
         {
+            "author": "magicdmer",
+            "description": "选择分类，点击回车后会随机一张对应分类的壁纸",
+            "id": "915AA0B2132A4C68B3747CF4CF9FDD7F",
+            "name": "随心壁纸",
+            "type": "e",
+            "version": "1.1.0"
+        }, 
+        {
             "author": "Michikora",
             "description": "A simple Colors viewer with python3.",
             "id": "98E708098AD643A4954D8451244D92AD",
@@ -128,14 +136,6 @@
             "name": "Where",
             "type": "python",
             "version": "1.0.0"
-        }, 
-        {
-            "author": "magicdmer",
-            "description": "选择分类，点击回车后会随机一张对应分类的壁纸",
-            "id": "915AA0B2132A4C68B3747CF4CF9FDD7F",
-            "name": "随心壁纸",
-            "type": "e",
-            "version": "1.1.0"
         }
     ],
     "version": "1.9.3.3"
