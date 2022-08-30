@@ -128,6 +128,14 @@
             "name": "Where",
             "type": "python",
             "version": "1.0.0"
+        }, 
+        {
+            "author": "magicdmer",
+            "description": "选择分类，点击回车后会随机一张对应分类的壁纸",
+            "id": "915AA0B2132A4C68B3747CF4CF9FDD7F",
+            "name": "随心壁纸",
+            "type": "e",
+            "version": "1.1.0"
         }
     ],
     "version": "1.9.3.3"
