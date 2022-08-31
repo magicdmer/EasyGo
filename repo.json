@@ -1,5 +1,5 @@
 {
-    "count": 16,
+    "count": 17,
     "plugins": [
         {
             "author": "magicdmer",
@@ -7,7 +7,8 @@
             "id": "915AA0B2132A4C68B3747CF4CF9FDD7F",
             "name": "随心壁纸",
             "type": "e",
-            "version": "1.1.0"
+            "version": "1.1.0", 
+            "timestamp": 1661871960
         }, 
         {
             "author": "Michikora",
@@ -15,7 +16,8 @@
             "id": "98E708098AD643A4954D8451244D92AD",
             "name": "ColorS",
             "type": "python",
-            "version": "1.0.7"
+            "version": "1.0.7", 
+            "timestamp": 1566437100
         },
         {
             "author": "magicdmer",
@@ -23,7 +25,8 @@
             "id": "14B0EBB2FE874B0DB07400486FE68F61",
             "name": "随心记",
             "type": "c++",
-            "version": "1.0.0"
+            "version": "1.0.0", 
+            "timestamp": 1660362240
         },
         {
             "author": "cmaybon",
@@ -31,7 +34,8 @@
             "id": "DE23F6BA808C434DBF61F2733C2A2297",
             "name": "FindText",
             "type": "python",
-            "version": "1.1.0"
+            "version": "1.1.0", 
+            "timestamp": 1659837540
         },
         {
             "author": "magicdmer",
@@ -39,7 +43,8 @@
             "id": "CB7471CF435946B3A9E8159320C801F8",
             "name": "magnet2torrent",
             "type": "python",
-            "version": "1.0.0"
+            "version": "1.0.0", 
+            "timestamp": 1661088360
         },
         {
             "author": "panda",
@@ -47,7 +52,8 @@
             "id": "DF1DFF3CD1A747CAA990416AEC16621E",
             "name": "ipsearch",
             "type": "python",
-            "version": "1.0.0"
+            "version": "1.0.0", 
+            "timestamp": 1567128840
         },
         {
             "author": "magicdmer",
@@ -55,7 +61,8 @@
             "id": "C1E188526B6E48579A3B92E96A478EFD",
             "name": "ProcessManager",
             "type": "python",
-            "version": "1.0.0"
+            "version": "1.0.0", 
+            "timestamp": 1578631020
         },
         {
             "author": "RomanKornev",
@@ -63,7 +70,8 @@
             "id": "a246dac93d45486f96b985669557846c",
             "name": "PythonCalculator",
             "type": "python",
-            "version": "1.1.1"
+            "version": "1.1.1", 
+            "timestamp": 1566037800
         },
         {
             "author": "JingQiSu",
@@ -71,7 +79,8 @@
             "id": "97303f6f2b70e5a965c8445f456920d3",
             "name": "Recall",
             "type": "python",
-            "version": "1.0.0"
+            "version": "1.0.0", 
+            "timestamp": 1566054960
         },
         {
             "author": "panda",
@@ -79,7 +88,8 @@
             "id": "8BF2E3BFC25E47E6B912EFB289634D12",
             "name": "SwitchWindows",
             "type": "python",
-            "version": "1.1.0"
+            "version": "1.1.0", 
+            "timestamp": 1578301380
         },
         {
             "author": "Edris Tavoosi",
@@ -87,7 +97,8 @@
             "id": "AAD2C231084D6632B66FE0C79D62C666",
             "name": "SystemStats",
             "type": "python",
-            "version": "1.1.1"
+            "version": "1.1.1", 
+            "timestamp": 1661306400
         },
         {
             "author": "magicdmer",
@@ -95,7 +106,8 @@
             "id": "8B3C65CDD23444DAADC937276C5A0EBA",
             "name": "图片格式转换",
             "type": "python",
-            "version": "1.1.0"
+            "version": "1.1.0", 
+            "timestamp": 1565518260
         },
         {
             "author": "magicdmer",
@@ -103,7 +115,8 @@
             "id": "14B0EBB2FE874B0DB07400476FE68F60",
             "name": "小鸡词典",
             "type": "e",
-            "version": "1.0.0"
+            "version": "1.0.0", 
+            "timestamp": 1659970800
         },
         {
             "author": "magicdmer",
@@ -111,7 +124,8 @@
             "id": "82B3B9BC945346A3938D6095DAFFF432",
             "name": "时间戳",
             "type": "python",
-            "version": "1.0.0"
+            "version": "1.1.0", 
+            "timestamp": 1661909872
         },
         {
             "author": "magicdmer",
@@ -119,7 +133,8 @@
             "id": "B04965E6A9BB591F8F8A1ADCBAC8DC39",
             "name": "磁力搜索",
             "type": "python",
-            "version": "1.3.2"
+            "version": "1.3.2", 
+            "timestamp": 1661088360
         },
         {
             "author": "Michikora",
@@ -127,7 +142,8 @@
             "id": "564F9E5A568F446AA8A7F51C76E712A4",
             "name": "SteamLAUNCHER",
             "type": "python",
-            "version": "1.1.5"
+            "version": "1.1.5", 
+            "timestamp": 1566048960
         },
         {
             "author": "Wayne Custaf Laqinoa Ferdon",
@@ -135,7 +151,8 @@
             "id": "FBCFED0795A937344D76D787F9D2CFC5",
             "name": "Where",
             "type": "python",
-            "version": "1.0.0"
+            "version": "1.0.0", 
+            "timestamp": 1661266860
         }
     ],
     "version": "1.9.3.3"
