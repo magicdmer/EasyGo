@@ -124,9 +124,9 @@
             "id": "82B3B9BC945346A3938D6095DAFFF432",
             "name": "时间戳",
             "type": "python",
-            "version": "1.1.0", 
-            "update": "添加指定时间转时间戳的功能",
-            "timestamp": 1661909872
+            "version": "1.1.1", 
+            "update": "添加指定时间转时间戳的功能，默认回车模式",
+            "timestamp": 1661953723
         },
         {
             "author": "magicdmer",
