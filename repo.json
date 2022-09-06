@@ -1,6 +1,15 @@
 {
-    "count": 17,
+    "count": 18,
     "plugins": [
+        {
+            "author": "magicdmer",
+            "description": "批量按规则重命名，需要1.9.4版本",
+            "id": "0714B780A2C74CAC97EDEB6A516E2DA6",
+            "name": "高级重命名",
+            "type": "python",
+            "version": "1.0.0", 
+            "timestamp": 1661871960
+        },
         {
             "author": "magicdmer",
             "description": "选择分类，点击回车后会随机一张对应分类的壁纸",
@@ -106,8 +115,8 @@
             "id": "8B3C65CDD23444DAADC937276C5A0EBA",
             "name": "图片格式转换",
             "type": "python",
-            "version": "1.1.0", 
-            "timestamp": 1565518260
+            "version": "1.2.0", 
+            "timestamp": 1662471195
         },
         {
             "author": "magicdmer",
@@ -156,5 +165,5 @@
             "timestamp": 1661266860
         }
     ],
-    "version": "1.9.3.6"
+    "version": "1.9.4.0"
 }
