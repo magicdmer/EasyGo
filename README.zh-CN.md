@@ -1,6 +1,7 @@
 # EasyGo 快捷启动
 
 [![Join the chat at https://gitter.im/magicdmer/EasyGo](https://badges.gitter.im/magicdmer/EasyGo.svg)](https://gitter.im/magicdmer/EasyGo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Watch video at https://www.bilibili.com/video/BV16P4y1Z7jQ/?](https://img.shields.io/badge/watch-on%20bilibili-brightgreen)](https://www.bilibili.com/video/BV16P4y1Z7jQ/?)
 
 ## 简介
 这是一款快捷启动软件，基本功能是快速查找所要打开的软件，并对其进行打开等操作。增强功能为软件所支持的各种插件，比如书签搜索，有道翻译 ，天气查询 等。插件支持python，c++和易语言三种语言，下面是动态图演示：
