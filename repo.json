@@ -1,6 +1,15 @@
 {
-    "count": 20,
+    "count": 21,
     "plugins": [
+        {
+            "author": "magicdmer",
+            "description": "数字转中文大小写",
+            "id": "EA8CF21A69334143B575E86052376E69",
+            "name": "数字转中文",
+            "type": "python",
+            "version": "1.0.0", 
+            "timestamp": 1664207355
+        },
         {
             "author": "magicdmer",
             "description": "查找收听网易和qq免费音乐，需要1.9.5之后版本",
