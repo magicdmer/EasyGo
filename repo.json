@@ -1,6 +1,15 @@
 {
-    "count": 21,
+    "count": 22,
     "plugins": [
+        {
+            "author": "magicdmer",
+            "description": "查询豆瓣影视信息",
+            "id": "9E0AC0B8324948F4844468ABA16A35BE",
+            "name": "豆瓣电影",
+            "type": "python",
+            "version": "1.0.0", 
+            "timestamp": 1664381023
+        },
         {
             "author": "magicdmer",
             "description": "数字转中文大小写",
