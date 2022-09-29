@@ -3,12 +3,12 @@
     "plugins": [
         {
             "author": "magicdmer",
-            "description": "查询豆瓣影视信息",
-            "id": "9E0AC0B8324948F4844468ABA16A35BE",
-            "name": "豆瓣电影",
+            "description": "查询豆瓣影视书籍信息",
+            "id": "66F1BAE818094EE299FECD5C748C17DC",
+            "name": "豆瓣搜索",
             "type": "python",
             "version": "1.0.0", 
-            "timestamp": 1664381023
+            "timestamp": 1664467275
         },
         {
             "author": "magicdmer",
