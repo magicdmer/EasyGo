@@ -1,6 +1,15 @@
 {
-    "count": 22,
+    "count": 23,
     "plugins": [
+		{
+            "author": "magicdmer",
+            "description": "查询城市天气，支持中英文输入",
+            "id": "b21a07988beb11e89b2ce4a47160ab6b",
+            "name": "Mine Weather",
+            "type": "python",
+            "version": "1.2.0", 
+            "timestamp": 1664528682
+        },
         {
             "author": "magicdmer",
             "description": "查询豆瓣影视书籍信息",
