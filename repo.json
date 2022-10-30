@@ -3,7 +3,7 @@
     "plugins": [
         {
             "author": "panda",
-            "description": "调用everything查找文件",
+            "description": "调用everything查找文件，依赖1.9.6之后版本",
             "id": "490CC5417664451584C16889CFEBCCFC",
             "name": "EverythingForPython",
             "type": "python",
@@ -223,5 +223,5 @@
             "timestamp": 1661266860
         }
     ],
-    "version": "1.9.5.0"
+    "version": "1.9.6.0"
 }
