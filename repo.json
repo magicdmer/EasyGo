@@ -1,6 +1,16 @@
 {
-    "count": 23,
+    "count": 24,
     "plugins": [
+        {
+            "author": "panda",
+            "description": "调用everything查找文件",
+            "id": "490CC5417664451584C16889CFEBCCFC",
+            "name": "Mine Weather",
+            "type": "python",
+            "version": "1.0.3",
+            "min_require": "1.9.6",
+            "timestamp": 1667112247
+        },
 		{
             "author": "magicdmer",
             "description": "查询城市天气，支持中英文输入",
@@ -35,6 +45,7 @@
             "name": "随心听",
             "type": "e",
             "version": "1.0.0", 
+            "min_require": "1.9.5",
             "timestamp": 1663948447
         },
         {
@@ -44,6 +55,7 @@
             "name": "百度百科",
             "type": "e",
             "version": "1.0.0", 
+            "min_require": "1.9.5",
             "timestamp": 1663948315
         },
         {
@@ -53,6 +65,7 @@
             "name": "高级重命名",
             "type": "python",
             "version": "1.0.0", 
+            "min_require": "1.9.4",
             "timestamp": 1661871960
         },
         {
