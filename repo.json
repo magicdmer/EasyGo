@@ -5,7 +5,7 @@
             "author": "panda",
             "description": "调用everything查找文件",
             "id": "490CC5417664451584C16889CFEBCCFC",
-            "name": "Mine Weather",
+            "name": "EverythingForPython",
             "type": "python",
             "version": "1.0.3",
             "min_require": "1.9.6",
