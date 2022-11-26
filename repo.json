@@ -2,6 +2,16 @@
     "count": 24,
     "plugins": [
         {
+            "author": "magicdmer",
+            "description": "查询疫情信息",
+            "id": "C632E061CF0B4D9DB279549D7B2378A0",
+            "name": "疫情小助手",
+            "type": "python",
+            "version": "1.1.0",
+            "min_require": "1.9.5",
+            "timestamp": 1669448206
+        },
+        {
             "author": "panda",
             "description": "调用everything查找文件，依赖1.9.6之后版本",
             "id": "490CC5417664451584C16889CFEBCCFC",
