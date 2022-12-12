@@ -5,7 +5,7 @@
             "author": "magicdmer",
             "description": "查看几大平台今日热点，热榜",
             "id": "4AF5322EE57F4373AF08E64455BFA3EE",
-            "name": "疫情小助手",
+            "name": "今日热点",
             "type": "python",
             "version": "1.0.0",
             "min_require": "1.9.6",
