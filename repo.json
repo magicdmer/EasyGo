@@ -75,9 +75,10 @@
             "id": "5517141062F340B2B7C03F00662A3187",
             "name": "百度百科",
             "type": "e",
-            "version": "1.0.0", 
+            "version": "1.1.0", 
+            "update": "解决失效问题",
             "min_require": "1.9.5",
-            "timestamp": 1663948315
+            "timestamp": 1682777649
         },
         {
             "author": "magicdmer",
