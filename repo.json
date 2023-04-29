@@ -64,9 +64,10 @@
             "id": "95AA1746CC8F42BD964BC79FAE4509AB",
             "name": "随心听",
             "type": "e",
-            "version": "1.0.0", 
+            "version": "1.1.1", 
+            "update": "更新了一下接口",
             "min_require": "1.9.5",
-            "timestamp": 1663948447
+            "timestamp": 1682774538
         },
         {
             "author": "magicdmer",
