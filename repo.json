@@ -96,8 +96,8 @@
             "id": "915AA0B2132A4C68B3747CF4CF9FDD7F",
             "name": "随心壁纸",
             "type": "e",
-            "version": "1.2.0", 
-            "timestamp": 1662883256
+            "version": "1.2.2", 
+            "timestamp": 1687784779
         }, 
         {
             "author": "Michikora",
@@ -197,15 +197,6 @@
             "type": "python",
             "version": "1.2.0", 
             "timestamp": 1662471195
-        },
-        {
-            "author": "magicdmer",
-            "description": "小鸡词典查询",
-            "id": "14B0EBB2FE874B0DB07400476FE68F60",
-            "name": "小鸡词典",
-            "type": "e",
-            "version": "1.0.0", 
-            "timestamp": 1659970800
         },
         {
             "author": "magicdmer",
