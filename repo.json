@@ -1,6 +1,16 @@
 {
-    "count": 25,
+    "count": 26,
     "plugins": [
+        {
+            "author": "magicdmer",
+            "description": "查询steam游戏信息",
+            "id": "7553B325DA77482AA054F570A3638C93",
+            "name": "游戏小助手",
+            "type": "e",
+            "version": "1.0.0",
+            "min_require": "1.9.5",
+            "timestamp": 1688482213
+        },
         {
             "author": "magicdmer",
             "description": "查看几大平台今日热点，热榜",
