@@ -70,11 +70,11 @@
         },
         {
             "author": "magicdmer",
-            "description": "查找收听网易和qq免费音乐，需要1.9.5之后版本",
+            "description": "查找收听qq免费音乐，需要1.9.5之后版本",
             "id": "95AA1746CC8F42BD964BC79FAE4509AB",
             "name": "随心听",
             "type": "e",
-            "version": "1.1.1", 
+            "version": "1.1.2", 
             "update": "更新了一下接口",
             "min_require": "1.9.5",
             "timestamp": 1682774538
