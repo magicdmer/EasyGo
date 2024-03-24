@@ -220,12 +220,12 @@
         },
         {
             "author": "magicdmer",
-            "description": "BTSHOW磁力搜索",
+            "description": "磁力搜索",
             "id": "B04965E6A9BB591F8F8A1ADCBAC8DC39",
             "name": "磁力搜索",
             "type": "python",
-            "version": "1.3.2", 
-            "timestamp": 1661088360
+            "version": "1.3.4", 
+            "timestamp": 1711265368
         },
         {
             "author": "Michikora",
