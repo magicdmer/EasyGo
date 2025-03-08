@@ -74,8 +74,8 @@
             "id": "95AA1746CC8F42BD964BC79FAE4509AB",
             "name": "随心听",
             "type": "e",
-            "version": "1.1.2", 
-            "update": "更新了一下接口",
+            "version": "1.1.3", 
+            "update": "更新了一下接口，网易和酷我",
             "min_require": "1.9.5",
             "timestamp": 1682774538
         },
