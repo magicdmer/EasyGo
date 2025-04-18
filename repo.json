@@ -233,7 +233,7 @@
             "id": "564F9E5A568F446AA8A7F51C76E712A4",
             "name": "SteamLAUNCHER",
             "type": "python",
-            "version": "1.1.5", 
+            "version": "1.1.6", 
             "timestamp": 1566048960
         },
         {
@@ -246,5 +246,5 @@
             "timestamp": 1661266860
         }
     ],
-    "version": "1.9.8"
+    "version": "1.9.8.2"
 }
