@@ -13,16 +13,6 @@
         },
         {
             "author": "magicdmer",
-            "description": "查看几大平台今日热点，热榜",
-            "id": "4AF5322EE57F4373AF08E64455BFA3EE",
-            "name": "今日热点",
-            "type": "python",
-            "version": "1.0.0",
-            "min_require": "1.9.6",
-            "timestamp": 1670741363
-        },
-        {
-            "author": "magicdmer",
             "description": "查询疫情信息",
             "id": "C632E061CF0B4D9DB279549D7B2378A0",
             "name": "疫情小助手",
@@ -137,15 +127,6 @@
             "timestamp": 1659837540
         },
         {
-            "author": "magicdmer",
-            "description": "磁链转bt种子",
-            "id": "CB7471CF435946B3A9E8159320C801F8",
-            "name": "magnet2torrent",
-            "type": "python",
-            "version": "1.0.0", 
-            "timestamp": 1661088360
-        },
-        {
             "author": "panda",
             "description": "search ip with python3.",
             "id": "DF1DFF3CD1A747CAA990416AEC16621E",
@@ -224,8 +205,8 @@
             "id": "B04965E6A9BB591F8F8A1ADCBAC8DC39",
             "name": "磁力搜索",
             "type": "python",
-            "version": "1.3.4", 
-            "timestamp": 1711265368
+            "version": "1.3.7", 
+            "timestamp": 1761317047
         },
         {
             "author": "Michikora",
@@ -246,5 +227,5 @@
             "timestamp": 1661266860
         }
     ],
-    "version": "1.9.8.2"
+    "version": "1.9.8.3"
 }
