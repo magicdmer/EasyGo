@@ -29,18 +29,18 @@ Wox官网：http://www.wox.one/
 
 
 
-## 工程结构
+## 插件仓库
 
-**main**:  EasyGo主体文件，包含完整包和升级包，解压可用
+参考 [EasyGoPlugin](https://github.com/magicdmer/EasyGoPlugin)
 
-**plugin**:  插件目录，格式为 `.plugin`  ，其实就是 zip 格式改了后缀，具体可以看压缩包自带的文档
 
-**plugin-sources**:  这个里面是插件源码，主要是c++和易语言的，因为python本身就是源码，可以解压看
 
 
 ## 帮助文档
 1. 可以直接查看 github 上的 wiki 分类
 2. 查看压缩包类的 mht 文档
+
+
 
 ## 交流
 1. QQ群：707119847
