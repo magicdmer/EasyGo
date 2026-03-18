@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SetDlg</class>
+ <widget class="QDialog" name="SetDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>742</width>
+    <height>523</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>设置</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>通用</string>
+      </attribute>
+      <widget class="QCheckBox" name="chkBoxBootRun">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>451</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>开机启动（请使用右键管理员运行设置）</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkBoxAutoHide">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>60</y>
+         <width>161</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>失去焦点自动隐藏</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkRemPosition">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>100</y>
+         <width>151</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>记住上次启动位置</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comBoxDisplayNum">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>225</y>
+         <width>61</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>230</y>
+         <width>131</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>单页结果显示个数:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>390</y>
+         <width>86</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Python路径:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditPythonPath">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>380</y>
+         <width>271</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonView">
+       <property name="geometry">
+        <rect>
+         <x>400</x>
+         <y>380</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>浏览</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>280</y>
+         <width>101</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>最大结果数量:</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBoxMaxCount">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>275</y>
+         <width>61</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>330</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>启动快捷键:</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkDisableMouse">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>140</y>
+         <width>241</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>禁用鼠标（ 重启EasyGo生效）</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonReset">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>325</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string> 恢复默认</string>
+       </property>
+      </widget>
+      <widget class="QKeySequenceEdit" name="keySequenceEdit">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>323</y>
+         <width>161</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkBoxCheckUpdate">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>180</y>
+         <width>111</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>启动检查更新</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonCheckUpdate">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>173</y>
+         <width>80</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>检查更新</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>450</y>
+         <width>86</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string> 源仓库地址:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditRepoUrl">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>440</y>
+         <width>521</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="placeholderText">
+        <string>分支根目录：https://raw.githubusercontent.com/magicdmer/EasyGo/main</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>插件</string>
+      </attribute>
+      <widget class="QTreeWidget" name="treeWidget">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>736</width>
+         <height>495</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAsNeeded</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::DoubleClicked</set>
+       </property>
+       <property name="textElideMode">
+        <enum>Qt::ElideMiddle</enum>
+       </property>
+       <property name="indentation">
+        <number>0</number>
+       </property>
+       <property name="itemsExpandable">
+        <bool>false</bool>
+       </property>
+       <attribute name="headerCascadingSectionResizes">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="headerStretchLastSection">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>程序</string>
+      </attribute>
+      <widget class="QPushButton" name="pushButtonAdd">
+       <property name="geometry">
+        <rect>
+         <x>380</x>
+         <y>455</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>添加</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonDelete">
+       <property name="geometry">
+        <rect>
+         <x>500</x>
+         <y>455</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除</string>
+       </property>
+      </widget>
+      <widget class="QListWidget" name="listWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>716</width>
+         <height>391</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonIndex">
+       <property name="geometry">
+        <rect>
+         <x>620</x>
+         <y>455</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>索引</string>
+       </property>
+      </widget>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>455</y>
+         <width>141</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="textVisible">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkEnableNormalIndex">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>15</y>
+         <width>361</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>启用普通文件遍历方式（不推荐，索引速度较慢）</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkClearHistory">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>15</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>启用清空上次输入内容</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>460</y>
+         <width>171</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 11, 64);</string>
+       </property>
+       <property name="text">
+        <string>右键管理员打开进行索引</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>网址</string>
+      </attribute>
+      <widget class="QTreeWidget" name="wsTreeWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>716</width>
+         <height>391</height>
+        </rect>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::DoubleClicked</set>
+       </property>
+       <property name="indentation">
+        <number>0</number>
+       </property>
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QPushButton" name="pushButtonAddUrl">
+       <property name="geometry">
+        <rect>
+         <x>510</x>
+         <y>455</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>添加</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonDelUrl">
+       <property name="geometry">
+        <rect>
+         <x>620</x>
+         <y>455</y>
+         <width>93</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>删除</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkBoxSuggest">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>15</y>
+         <width>161</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>启用百度搜索建议</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>其他</string>
+      </attribute>
+      <widget class="QLabel" name="labelUsage">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>351</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>你已经激活了EasyGo 0 次</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

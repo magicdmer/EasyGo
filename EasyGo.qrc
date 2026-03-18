@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/image"/>
+    <qresource prefix="/">
+        <file>Images/app.ico</file>
+        <file>Images/weixin.png</file>
+        <file>Images/zhifubao.jpg</file>
+        <file>Images/message.png</file>
+        <file>Images/pause.png</file>
+        <file>Images/play.png</file>
+    </qresource>
+</RCC>
