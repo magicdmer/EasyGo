@@ -400,7 +400,7 @@ QPixmap ConvertColor(QPixmap& pixmap, QColor color)
 
 bool CheckUpdate(QString& version)
 {
-    QString repoUrl = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGo/main/repo.json";
+    QString repoUrl = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGoPlugin/main/repo.json";
     if (!GetSettings()->m_repo_url.isEmpty())
     {
         repoUrl = QString("%1/repo.json").arg(GetSettings()->m_repo_url);
