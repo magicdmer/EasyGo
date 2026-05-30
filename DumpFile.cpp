@@ -1,11 +1,10 @@
-#include "DumpFile.h"
+﻿#include "DumpFile.h"
+
+#ifdef Q_OS_WIN32
 
 #include <windows.h>
 #include <DbgHelp.h>
 #include <stdlib.h>
-#ifndef _M_IX86
-#error "The following code only works for x86!"
-#endif
 
 inline BOOL IsDataSectionNeeded(const WCHAR* pModuleName)
 {
@@ -91,3 +90,11 @@ void InitMinDump()
     SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
     DisableSetUnhandledExceptionFilter();
 }
+
+#else
+
+void InitMinDump()
+{
+}
+
+#endif

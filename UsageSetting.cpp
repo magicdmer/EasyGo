@@ -1,4 +1,4 @@
-#include "UsageSetting.h"
+﻿#include "UsageSetting.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -12,7 +12,7 @@ UsageSetting::UsageSetting():m_usage(0)
 
 bool UsageSetting::load()
 {
-    QFile file("Settings\\Usage.json");
+    QFile file("Settings/Usage.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qLog("Open Usage.json failed");
@@ -47,7 +47,7 @@ bool UsageSetting::save()
 
     QByteArray byte_array = document.toJson(QJsonDocument::Indented);
 
-    QFile file("Settings\\Usage.json");
+    QFile file("Settings/Usage.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return false;

@@ -1,4 +1,4 @@
-#ifndef WEBSEARCHSETDLG_H
+﻿#ifndef WEBSEARCHSETDLG_H
 #define WEBSEARCHSETDLG_H
 
 #include <QDialog>

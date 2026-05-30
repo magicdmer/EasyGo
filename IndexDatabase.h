@@ -11,12 +11,13 @@ struct ProgramInfo{
     QString pyname;
     QString name;
     QString path;
+    QString iconPath;
+    QString desktopPath;    // Linux: .desktop 文件路径，用于按规范启动；Windows 留空
 };
 
 class IndexDatabase
 {
 public:
-    IndexDatabase();
     IndexDatabase(QString name);
     IndexDatabase(QString connecName, QString dbName);
     ~IndexDatabase();

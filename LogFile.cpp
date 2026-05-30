@@ -34,7 +34,7 @@ void CEasyLog::writeLog(LOG_LEVEL level, QString strLog)
     m_mutex.lock();
     QDate date = QDate::currentDate();
     QString strFileName = date.toString("yyyy-MM-dd");
-    strFileName = "log/" + strFileName + ".log";
+    strFileName = "Log/" + strFileName + ".log";
 
     QFile file(strFileName);
     if (!file.open(QIODevice::ReadWrite | QIODevice::Append))

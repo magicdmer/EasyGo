@@ -16,13 +16,11 @@
 #include <QProgressDialog>
 #include <QTextCodec>
 #include "UsageSetting.h"
-#include "quazip.h"
-#include "quazipfile.h"
-#include "JlCompress.h"
 #include "HelperFunc.h"
 #include "PluginSetDlg.h"
 #include "InstallDlg.h"
 #include "ShowContentDlg.h"
+#include <QTextStream>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)
 # pragma execution_character_set("utf-8")
@@ -92,7 +90,17 @@ SetDlg::SetDlg(QWidget *parent) :
     ui->progressBar->setMaximum(0);
     ui->progressBar->hide();
 
+#ifndef Q_OS_WIN32
+    ui->chkEnableNormalIndex->hide();
+    ui->label_5->hide();
+    ui->chkClearHistory->setGeometry(ui->chkEnableNormalIndex->geometry());
+#endif
+
     ui->keySequenceEdit->setKeySequence(QKeySequence(GetSettings()->m_hotKey));
+    const bool uos = isUos();
+    ui->keySequenceEdit->setVisible(!uos);
+    ui->pushButtonReset->setVisible(!uos);
+    ui->labelShortcutHint->setVisible(uos);
 
     for (int i = 6,j=0; i <= 10; i++,j++)
     {
@@ -219,6 +227,15 @@ void SetDlg::LoadPath()
     ui->chkEnableNormalIndex->setChecked(setting->m_indexCfg.enableNormalIndex);
     ui->chkClearHistory->setChecked(setting->m_indexCfg.clearHistory);
     QStringList& indexPath = setting->m_indexCfg.indexPath;
+#ifdef Q_OS_LINUX
+    if (indexPath.isEmpty())
+    {
+        indexPath.append("/usr/share/applications");
+        indexPath.append(QString("%1/.local/share/applications").arg(QDir::homePath()));
+        indexPath.append("/usr/share/ubuntu/applications");
+        indexPath.append("/var/lib/snapd/desktop/applications");
+    }
+#endif
     for (int i = 0; i < indexPath.size(); i++)
     {
         ui->listWidget->addItem(indexPath[i]);
@@ -467,10 +484,14 @@ void SetDlg::sltOpenFolder()
     QString pluginId = curItem->data(0,Qt::UserRole).toString();
     QString pluginPath = GetPluginMananger()->getPlugin(pluginId)->m_path;
 
+#ifdef Q_OS_WIN32
     QProcess process;
     QString cmdLine = QString("explorer %1").arg(pluginPath);
     cmdLine = cmdLine.replace("/","\\");
     process.startDetached(cmdLine);
+#else
+    QProcess::startDetached("/usr/bin/xdg-open", QStringList() << pluginPath);
+#endif
 }
 
 void SetDlg::sltInstallPlugin()
@@ -484,29 +505,16 @@ void SetDlg::sltInstallPlugin()
     if(dialog.exec())
     {
         QString filePath = dialog.selectedFiles()[0];
+#ifdef Q_OS_WIN32
         filePath = filePath.replace("/","\\");
+#endif
 
-        QuaZip zip(filePath);
-        if (!zip.open(QuaZip::mdUnzip))
+        QByteArray pluginContent = ReadZipEntry(filePath, "plugin.json");
+        if (pluginContent.isEmpty())
         {
-            QMessageBox::information(this,tr("提示"),tr("打开插件失败"));
-            return;
-        }
-
-        zip.setCurrentFile("plugin.json");
-
-        QuaZipFile zipfile(&zip);
-        if (!zipfile.open(QIODevice::ReadOnly))
-        {
-            zip.close();
             QMessageBox::information(this,tr("提示"),tr("找不到插件信息"));
             return;
         }
-
-        QByteArray pluginContent = zipfile.readAll();
-
-        zipfile.close();
-        zip.close();
 
         QJsonParseError parseJsonErr;
         QJsonDocument document = QJsonDocument::fromJson(pluginContent, &parseJsonErr);
@@ -527,11 +535,13 @@ void SetDlg::sltInstallPlugin()
 
         if (pluginType == "python")
         {
+#ifdef Q_OS_WIN32
             if (ui->lineEditPythonPath->text().isEmpty())
             {
                 QMessageBox::information(this,tr("提示"),tr("该插件需要依赖python环境，请设置后安装"));
                 return;
             }
+#endif
         }
 
         InstallDlg dlg(this);
@@ -597,8 +607,7 @@ void SetDlg::sltInstallPlugin()
             }
         }
 
-        QStringList extractFiles = JlCompress::extractDir(filePath,pluginPath);
-        if (extractFiles.isEmpty())
+        if (!ExtractZip(filePath, pluginPath))
         {
             QMessageBox::information(this,tr("提示"),tr("解压插件失败"));
             return;
@@ -728,10 +737,14 @@ void SetDlg::sltOpenUrl()
         return;
     }
 
+#ifdef Q_OS_WIN32
     QProcess process;
     QString cmdLine = QString("explorer %1").arg(webPath);
     cmdLine = cmdLine.replace("/","\\");
     process.startDetached(cmdLine);
+#else
+    QProcess::startDetached("/usr/bin/xdg-open", QStringList() << webPath);
+#endif
 }
 
 void SetDlg::sltOpenDetail()
@@ -785,7 +798,10 @@ void SetDlg::closeEvent(QCloseEvent *event)
     GetSettings()->m_maxResultsPerPage = ui->comBoxDisplayNum->currentText().toInt();
     GetSettings()->m_remLastPosition = ui->chkRemPosition->isChecked();
     GetSettings()->m_pythonPath = ui->lineEditPythonPath->text();
-    GetSettings()->m_hotKey = ui->keySequenceEdit->keySequence().toString();
+    if (ui->keySequenceEdit->isVisible())
+    {
+        GetSettings()->m_hotKey = ui->keySequenceEdit->keySequence().toString();
+    }
     GetSettings()->m_disableMouse = ui->chkDisableMouse->isChecked();
     GetSettings()->m_indexCfg.enableNormalIndex = ui->chkEnableNormalIndex->isChecked();
     GetSettings()->m_indexCfg.clearHistory = ui->chkClearHistory->isChecked();
@@ -798,6 +814,7 @@ void SetDlg::closeEvent(QCloseEvent *event)
 
     if (ui->chkBoxBootRun->isChecked())
     {
+#ifdef Q_OS_WIN32
         QSettings regSet("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",QSettings::NativeFormat);
         QString value_get = regSet.value("EasyGo").toString();
 
@@ -809,14 +826,45 @@ void SetDlg::closeEvent(QCloseEvent *event)
         {
             regSet.setValue("EasyGo",value_set);
         }
+#else
+        QString autostartDir = QDir::homePath() + "/.config/autostart";
+        QDir().mkpath(autostartDir);
+        QString desktopFile = autostartDir + "/EasyGo.desktop";
+        QFile file(desktopFile);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&file);
+            out << "[Desktop Entry]\n";
+            out << "Type=Application\n";
+            out << "Name=EasyGo\n";
+            out << "Exec=" << QApplication::applicationFilePath() << "\n";
+            out << "Hidden=false\n";
+            out << "NoDisplay=false\n";
+            out << "X-GNOME-Autostart-enabled=true\n";
+            file.close();
+        }
+#endif
+    }
+    else
+    {
+#ifdef Q_OS_LINUX
+        QString desktopFile = QDir::homePath() + "/.config/autostart/EasyGo.desktop";
+        QFile::remove(desktopFile);
+#endif
     }
 }
 
 void SetDlg::sltPushButtonAdd()
 {
+#ifdef Q_OS_WIN32
     QFileDialog dialog(0,tr("选择磁盘分区"),
                                    QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
                                    QObject::tr("支持类型 (*.*)"));
+#else
+    QFileDialog dialog(0,tr("选择索引文件夹"),
+                                   QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
+                                   QObject::tr("支持类型 (*.*)"));
+#endif
                 //dialog.setOption(QFileDialog::DontUseNativeDialog);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setFileMode(QFileDialog::Directory);
@@ -825,11 +873,19 @@ void SetDlg::sltPushButtonAdd()
     {
         QString filePath = dialog.selectedFiles()[0];
         QFileInfo fileInfo(filePath);
+#ifdef Q_OS_WIN32
         if (!fileInfo.isRoot())
         {
             QMessageBox::information(this,tr("提示"),tr("请选择磁盘分区"));
             return;
         }
+#else
+        if (!fileInfo.exists() || !fileInfo.isDir())
+        {
+            QMessageBox::information(this,tr("提示"),tr("请选择有效文件夹"));
+            return;
+        }
+#endif
 
         QStringList& pathList = GetSettings()->m_indexCfg.indexPath;
         if (pathList.contains(filePath))

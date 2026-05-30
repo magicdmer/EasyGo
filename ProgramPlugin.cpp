@@ -11,7 +11,9 @@
 #include "UserSelectRecord.h"
 #include "PluginManager.h"
 #include <QTime>
+#ifdef Q_OS_WIN32
 #include <Windows.h>
+#endif
 #include "WebSearchPlugin.h"
 #include "HelperFunc.h"
 #include "IndexTask.h"
@@ -324,9 +326,18 @@ bool ProgramPlugin::query(Query query,QVector<Result>& vecResult)
         result.id = PROGRAM_PLUGIN_ID;
         result.title = pg.name;
         result.subTitle = pg.path;
+#ifdef Q_OS_LINUX
+        result.iconPath = pg.iconPath.isEmpty() ? "Ra_NativeIcon" : pg.iconPath;
+#else
         result.iconPath = "Ra_NativeIcon";
+#endif
         result.action.funcName = "Ra_Open";
+#ifdef Q_OS_LINUX
+        // 启动用 .desktop 路径（交给 gio launch）；显示仍用 pg.path
+        result.action.parameter = pg.desktopPath.isEmpty() ? pg.path : pg.desktopPath;
+#else
         result.action.parameter = pg.path;
+#endif
         result.extraData = rawQuery;
         vecResult.append(result);
     }
@@ -360,13 +371,17 @@ bool ProgramPlugin::getMenu(Result& result, QVector<Result>& vecMenu)
 {
     if (result.action.funcName != "Ra_ActivePlugin")
     {
+#ifdef Q_OS_WIN32
         PVOID OldValue;
         Wow64DisableWow64FsRedirection (&OldValue);
+#endif
 
         QFileInfo info(result.subTitle);
         if (!info.isExecutable() && !info.isSymLink())
         {
+#ifdef Q_OS_WIN32
             Wow64RevertWow64FsRedirection (OldValue);
+#endif
             return false;
         }
 
@@ -384,7 +399,9 @@ bool ProgramPlugin::getMenu(Result& result, QVector<Result>& vecMenu)
         menu.action.parameter = info.filePath();
         vecMenu.append(menu);
 
+#ifdef Q_OS_WIN32
         Wow64RevertWow64FsRedirection (OldValue);
+#endif
     }
 
 
@@ -473,15 +490,21 @@ void ProgramPlugin::itemClick(Result &item,QObject* parent)
 
     if (action.funcName == "Ra_Open")
     {
-        if (item.iconPath == "Ra_NativeIcon")
+        if (item.iconPath == "Ra_NativeIconExtra")
         {
-            GetUserSelectRecord()->addScore(item.subTitle);
+            const QStringList titleParts = item.title.split(" ", QString::SkipEmptyParts);
+            if (titleParts.size() > 1)
+            {
+                GetUserSelectRecord()->addScore(titleParts[1]);
+            }
+            else
+            {
+                GetUserSelectRecord()->addScore(item.subTitle);
+            }
         }
         else
         {
-            //带参数的
-            QString filePath = item.title.split(" ")[1];
-            GetUserSelectRecord()->addScore(filePath);
+            GetUserSelectRecord()->addScore(item.subTitle);
         }
     }
     else if (action.funcName == "Ra_ActivePlugin")
@@ -493,10 +516,14 @@ void ProgramPlugin::itemClick(Result &item,QObject* parent)
 
     if (action.funcName.startsWith("Ra_"))
     {
+#ifdef Q_OS_WIN32
         PVOID OldValue;
         Wow64DisableWow64FsRedirection (&OldValue);
+#endif
         QByteArray ba = action.funcName.toUtf8();
         QMetaObject::invokeMethod(this,ba.data(),Q_ARG(QString,action.parameter),Q_ARG(QObject*,parent));
+#ifdef Q_OS_WIN32
         Wow64RevertWow64FsRedirection (OldValue);
+#endif
     }
 }

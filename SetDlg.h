@@ -24,16 +24,49 @@ protected:
     {
         QProcess process;
 
-        QString pythonPath = m_pythonPath + QString("/python.exe");
+        QString pythonPath;
+#ifdef Q_OS_WIN32
+        if (m_pythonPath.isEmpty())
+        {
+            pythonPath = "python.exe";
+        }
+        else
+        {
+            pythonPath = m_pythonPath + QString("/python.exe");
+        }
+#else
+        if (m_pythonPath.isEmpty())
+        {
+            pythonPath = "python3";
+        }
+        else
+        {
+            pythonPath = m_pythonPath + QString("/python3");
+        }
+#endif
 
-        QString strCmd = QString("\"%1\" -m pip install -i http://mirrors.aliyun.com/pypi/simple "
-                                 "--trusted-host mirrors.aliyun.com -r \"%2\"").
-                                 arg(pythonPath).arg(m_requirePath);
+        QStringList args;
+        args.append("-m");
+        args.append("pip");
+        args.append("install");
+        args.append("-i");
+        args.append("http://mirrors.aliyun.com/pypi/simple");
+        args.append("--trusted-host");
+        args.append("mirrors.aliyun.com");
+        args.append("-r");
+        args.append(m_requirePath);
 
-        process.start(strCmd);
+        process.setProgram(pythonPath);
+        process.setArguments(args);
+        process.start();
+
+        if (!process.waitForStarted())
+        {
+            m_exitCode = 1;
+            return;
+        }
 
         process.waitForFinished(-1);
-
         m_exitCode = process.exitCode();
     }
 public:

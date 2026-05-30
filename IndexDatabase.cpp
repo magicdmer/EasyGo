@@ -2,12 +2,6 @@
 #include <QVariant>
 #include "ChineseLetterHelper.h"
 
-IndexDatabase::IndexDatabase()
-{
-    m_database = QSqlDatabase::addDatabase("QSQLITE");
-    m_database.setDatabaseName("IndexCache.db");
-}
-
 IndexDatabase::IndexDatabase(QString name)
 {
     m_database = QSqlDatabase::addDatabase("QSQLITE",name);
@@ -22,7 +16,10 @@ IndexDatabase::IndexDatabase(QString conName, QString dbName)
 
 IndexDatabase::~IndexDatabase()
 {
+    QString connectionName = m_database.connectionName();
     m_database.close();
+    m_database = QSqlDatabase();
+    QSqlDatabase::removeDatabase(connectionName);
 }
 
 bool IndexDatabase::load()
@@ -36,7 +33,14 @@ bool IndexDatabase::load()
     if (tableList.isEmpty())
     {
         QSqlQuery query(m_database);
-        if (!query.exec("create table program(id integer primary key autoincrement,pyname text,name text,path text)"))
+        // Windows 沿用发布版的原始结构，升级零影响；Linux 为新平台，额外存图标与
+        // .desktop 路径，两套结构互不干扰。
+#ifdef Q_OS_LINUX
+        const char* createSql = "create table program(id integer primary key autoincrement,pyname text,name text,path text,iconpath text,desktoppath text)";
+#else
+        const char* createSql = "create table program(id integer primary key autoincrement,pyname text,name text,path text)";
+#endif
+        if (!query.exec(createSql))
         {
             return false;
         }
@@ -49,8 +53,13 @@ bool IndexDatabase::insert(ProgramInfo& info)
 {
     QSqlQuery query(m_database);
 
+#ifdef Q_OS_LINUX
+    QString strQuery = QString("insert into program values(null,\"%1\",\"%2\",\"%3\",\"%4\",\"%5\")").
+            arg(info.pyname).arg(info.name).arg(info.path).arg(info.iconPath).arg(info.desktopPath);
+#else
     QString strQuery = QString("insert into program values(null,\"%1\",\"%2\",\"%3\")").
             arg(info.pyname).arg(info.name).arg(info.path);
+#endif
 
     if (!query.exec(strQuery))
     {
@@ -107,6 +116,10 @@ bool IndexDatabase::query(QString querystr, QVector<ProgramInfo> &vecInfo)
         info.pyname = query.value(1).toString();
         info.name = query.value(2).toString();
         info.path = query.value(3).toString();
+#ifdef Q_OS_LINUX
+        info.iconPath = query.value(4).toString();
+        info.desktopPath = query.value(5).toString();
+#endif
         vecInfo.append(info);
     }
 
@@ -134,14 +147,15 @@ bool IndexDatabase::clear()
 
 IndexDatabase* GetIndexDatabase()
 {
-    static IndexDatabase indexdb("MainQuery");
+    static IndexDatabase* indexdb = nullptr;
     static bool s_initialed = false;
 
     if (!s_initialed)
     {
         s_initialed = true;
-        indexdb.load();
+        indexdb = new IndexDatabase("MainQuery");
+        indexdb->load();
     }
 
-    return &indexdb;
+    return indexdb;
 }

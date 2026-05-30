@@ -33,7 +33,7 @@ Settings::~Settings(void)
 
 bool Settings::load()
 {
-	QFile file("Settings\\Settings.json");
+	QFile file("Settings/Settings.json");
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
         qLog("Open Settings.json failed");
@@ -183,9 +183,9 @@ bool Settings::save()
         else
         {
             QJsonArray keysObj;
-            for (int i = 0; i < m_pluginConfig.size(); i++)
+            for (int j = 0; j < m_pluginConfig[i].keyword.size(); j++)
             {
-                keysObj.append(m_pluginConfig[i].keyword[i]);
+                keysObj.append(m_pluginConfig[i].keyword[j]);
             }
 
             pluginObj.insert("Keyword",keysObj);
@@ -223,7 +223,7 @@ bool Settings::save()
 
 	QByteArray byte_array = document.toJson(QJsonDocument::Indented);
 
-    QFile file("Settings\\Settings.json");
+    QFile file("Settings/Settings.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return false;

@@ -1,11 +1,7 @@
 ﻿#include "HelperFunc.h"
 #include <QDir>
-#include <Windows.h>
-#include <ShlObj.h>
 #include <QFileIconProvider>
-#include <shellapi.h>
 #include "LogFile.h"
-#include <QDateTime>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -17,9 +13,108 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QProcess>
+#include <QDateTime>
+#include <QFontDatabase>
+#include <QWidget>
+
+#ifdef Q_OS_WIN32
+#include "quazip.h"
+#include "quazipfile.h"
+#include "JlCompress.h"
+#endif
+
+#ifdef Q_OS_WIN32
+#include <Windows.h>
+#include <ShlObj.h>
+#include <shellapi.h>
+#else
+#include <QTextStream>
+#include <QUrl>
+#endif
+
+namespace {
+
+QString readOsReleaseValue(const QString& key)
+{
+    QFile file(QStringLiteral("/etc/os-release"));
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return QString();
+    }
+
+    while (!file.atEnd())
+    {
+        const QString line = QString::fromUtf8(file.readLine()).trimmed();
+        if (!line.startsWith(key + QLatin1Char('=')))
+        {
+            continue;
+        }
+
+        QString value = line.mid(key.size() + 1).trimmed();
+        if (value.startsWith(QLatin1Char('"')) && value.endsWith(QLatin1Char('"')) && value.size() >= 2)
+        {
+            value = value.mid(1, value.size() - 2);
+        }
+        return value;
+    }
+
+    return QString();
+}
+
+} // namespace
 
 #define USER_AGENT "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36"
 
+QString GetUiFontFamily()
+{
+#ifdef Q_OS_WIN32
+    return QStringLiteral("微软雅黑");
+#else
+    const QStringList preferredFonts = {
+        QStringLiteral("Source Han Sans SC"),
+        QStringLiteral("Noto Sans CJK SC"),
+        QStringLiteral("WenQuanYi Micro Hei"),
+        QStringLiteral("Noto Sans CJK TC"),
+        QStringLiteral("Noto Sans CJK JP")
+    };
+
+    QFontDatabase database;
+    const QStringList families = database.families();
+    for (const QString& family : preferredFonts)
+    {
+        if (families.contains(family))
+        {
+            return family;
+        }
+    }
+
+    QString fallback = QFontDatabase::systemFont(QFontDatabase::GeneralFont).family();
+    if (!fallback.isEmpty())
+    {
+        return fallback;
+    }
+
+    return QStringLiteral("Sans Serif");
+#endif
+}
+
+QFont GetUiFont(int pointSize, int weight)
+{
+    QFont font(GetUiFontFamily());
+    font.setStyleHint(QFont::SansSerif);
+    if (pointSize > 0)
+    {
+        font.setPointSize(pointSize);
+    }
+    if (weight >= 0)
+    {
+        font.setWeight(weight);
+    }
+    return font;
+}
+
+#ifdef Q_OS_WIN32
 void CopyFileToClipboard(QString filePath)
 {
     DROPFILES* dropFiles = NULL;
@@ -55,7 +150,7 @@ bool MvoeFileToRecyclebin(const QString &filename)
     opRecycle.wFunc             = FO_DELETE;
     opRecycle.pFrom             = ba.data();
     opRecycle.pTo               = nullptr;
-    opRecycle.fFlags            = FOF_ALLOWUNDO; //此Flag表示送进回收站
+    opRecycle.fFlags            = FOF_ALLOWUNDO;
     opRecycle.hNameMappings     = nullptr;
 
     if(SHFileOperationA(&opRecycle) != 0)
@@ -65,6 +160,101 @@ bool MvoeFileToRecyclebin(const QString &filename)
 
     return true;
 }
+
+void OpenFileFoler(QString& path)
+{
+    QString fileNativePath = QDir::toNativeSeparators(path);
+    WCHAR filePath[MAX_PATH] = {0};
+    fileNativePath.toWCharArray(filePath);
+    LPITEMIDLIST pItemIdList = NULL;
+    SHILCreateFromPath(filePath, &pItemIdList, NULL);
+    if (pItemIdList != NULL) {
+       CoInitialize(NULL);
+       SHOpenFolderAndSelectItems(pItemIdList, 0, NULL, 0);
+       CoTaskMemFree(pItemIdList);
+       CoUninitialize();
+    }
+}
+#else
+void CopyFileToClipboard(QString filePath)
+{
+    Q_UNUSED(filePath)
+}
+
+bool MvoeFileToRecyclebin(const QString &fileName)
+{
+    QFileInfo fileInfo(fileName);
+    if (!fileInfo.exists())
+    {
+        return false;
+    }
+
+    QString xdgDataHome = QFile::decodeName(qgetenv("XDG_DATA_HOME"));
+    QString trashPath = xdgDataHome.isEmpty()
+            ? QDir::homePath() + "/.local/share/Trash/"
+            : xdgDataHome + "/Trash/";
+    QString trashFilesPath = trashPath + "files/";
+    QString trashInfoPath = trashPath + "info/";
+
+    QDir dir;
+    if (!(dir.mkpath(trashFilesPath) && dir.mkpath(trashInfoPath)))
+    {
+        return false;
+    }
+
+    QString trashFileName = fileInfo.fileName();
+    QString trashFilePath = trashFilesPath + trashFileName;
+    if (QFile::exists(trashFilePath))
+    {
+        int suffixNumber = 1;
+        do
+        {
+            trashFileName = QString("%1.%2").arg(fileInfo.fileName()).arg(suffixNumber++);
+            trashFilePath = trashFilesPath + trashFileName;
+        } while (QFile::exists(trashFilePath));
+    }
+
+    QFile file(fileName);
+    if (!file.rename(trashFilePath))
+    {
+        return false;
+    }
+
+    QFile infoFile(trashInfoPath + trashFileName + ".trashinfo");
+    if (!infoFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QFile::rename(trashFilePath, fileName);
+        return false;
+    }
+
+    QTextStream stream(&infoFile);
+
+    QByteArray info = "[Trash Info]\n";
+    info += "Path=";
+    info += QUrl::toPercentEncoding(QFileInfo(fileName).absoluteFilePath(), "~_-./");
+    info += '\n';
+    info += "DeletionDate=";
+    info += QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1();
+    info += '\n';
+
+    stream << info;
+    infoFile.close();
+
+    return true;
+}
+
+void OpenFileFoler(QString& path)
+{
+    QFileInfo info(path);
+    if (!info.exists())
+    {
+        return;
+    }
+
+    QString folder = info.isDir() ? info.absoluteFilePath() : info.absolutePath();
+    QProcess::startDetached("/usr/bin/xdg-open", QStringList() << folder);
+}
+#endif
 
 QPixmap GetFileIcon(QString& path)
 {
@@ -91,28 +281,20 @@ QPixmap GetFileIcon(QString& path)
             pixmap = provider.icon(QFileIconProvider::File).pixmap(32,32);
         }
     }
- 
+
     return pixmap;
 }
 
-void OpenFileFoler(QString& path)
+QString NormalizePath(QString path)
 {
-    QString fileNativePath = QDir::toNativeSeparators(path);
-    WCHAR filePath[MAX_PATH] = {0};
-    fileNativePath.toWCharArray(filePath);
-    LPITEMIDLIST pItemIdList = NULL;
-    SHILCreateFromPath(filePath, &pItemIdList, NULL);
-    if (pItemIdList != NULL) {
-       CoInitialize(NULL);
-       SHOpenFolderAndSelectItems(pItemIdList, 0, NULL, 0);
-       CoTaskMemFree(pItemIdList);
-       CoUninitialize();
-    }
+    // Qt 内部各 API 在所有平台都接受 '/'，故统一转成 '/'，并清理多余分隔符与 . / ..。
+    path.replace('\\', '/');
+    return QDir::cleanPath(path);
 }
 
 QString GetRandomString(int length)
 {
-    qsrand(QDateTime::currentMSecsSinceEpoch());//为随机值设定一个seed
+    qsrand(QDateTime::currentMSecsSinceEpoch());
 
     const char chrs[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     int chrs_size = sizeof(chrs);
@@ -131,24 +313,24 @@ QString GetRandomString(int length)
     return ret;
 }
 
-QColor PixmapMainColor(QPixmap& p, double bright) //p为目标图片 bright为亮度系数，为1则表示保持不变
+QColor PixmapMainColor(QPixmap& p, double bright)
 {
     QPoint realPosition = RealPointFromAlphaPng(p);
 
-    int step = 20; //步长：在图片中取点时两点之间的间隔，若为1,则取所有点，适当将此值调大有利于提高运行速度
-    int t = 0; //点数：记录一共取了多少个点，用于做计算平均数的分母
-    QImage image = p.toImage(); //将Pixmap类型转为QImage类型
-    int r = 0, g = 0, b = 0; //三元色的值，分别用于记录各个点的rgb值的和
+    int step = 20;
+    int t = 0;
+    QImage image = p.toImage();
+    int r = 0, g = 0, b = 0;
     for (int i = 10; i < p.width() - 10; i += step) {
         for (int j = realPosition.y() + 5; j < p.height() - 5; j += step) {
-            if (image.valid(i, j)) { //判断该点是否有效
+            if (image.valid(i, j)) {
 
                 QColor c = image.pixelColor(i, j);
                 if (c.alpha() != 0)
                 {
-                    t++; //点数加一
+                    t++;
 
-                    r += c.red(); //将获取到的各个颜色值分别累加到rgb三个变量中
+                    r += c.red();
                     b += c.blue();
                     g += c.green();
                 }
@@ -158,7 +340,7 @@ QColor PixmapMainColor(QPixmap& p, double bright) //p为目标图片 bright为�
 
     return QColor(int(bright * r / t) > 255 ? 255 : int(bright * r / t),
         int(bright * g / t) > 255 ? 255 : int(bright * g / t),
-        int(bright * b / t) > 255 ? 255 : int(bright * b / t)); //最后返回的值是亮度系数×平均数,若超出255则设置为255也就是最大值，防止乘与亮度系数后导致某些值大于255的情况。
+        int(bright * b / t) > 255 ? 255 : int(bright * b / t));
 }
 
 QPoint RealPointFromAlphaPng(QPixmap& p)
@@ -187,23 +369,14 @@ QPoint RealPointFromAlphaPng(QPixmap& p)
     return first_valid_point;
 }
 
-double GetPngBrightness(QColor& color)
+double GetPngBrightness(const QColor& color)
 {
-    /*
-    int r, g, b;
-
-    int mc = color.name().remove("#").toInt(nullptr, 16);
-    r = mc >> 16;
-    g = mc >> 8 & 0xff;
-    b = mc & 0xff;
-    */
-
     double brightness = 0.299 * color.red() + 0.587 * color.green() + 0.114 * color.blue();
 
     return brightness;
 }
 
-QColor ToColor(QString& strRgb)
+QColor ToColor(const QString& strRgb)
 {
     if (strRgb.isEmpty()) return QColor();
 
@@ -254,7 +427,9 @@ QString HttpGet(QString& url)
     request.setRawHeader("User-Agent", USER_AGENT);
 
     QNetworkReply* reply = manager.get(request);
+#if (QT_VERSION >= QT_VERSION_CHECK(5,15,0))
     manager.setTransferTimeout(5000);
+#endif
     reply->ignoreSslErrors();
 
     QEventLoop loop;
@@ -332,10 +507,70 @@ bool HttpDownload(QString& url , QString& dst, bool autoproxy)
     return true;
 }
 
+QByteArray ReadZipEntry(const QString& zipPath, const QString& entryName)
+{
+#ifdef Q_OS_WIN32
+    QuaZip zip(zipPath);
+    if (!zip.open(QuaZip::mdUnzip))
+    {
+        return QByteArray();
+    }
+
+    if (!zip.setCurrentFile(entryName))
+    {
+        zip.close();
+        return QByteArray();
+    }
+
+    QuaZipFile zipfile(&zip);
+    if (!zipfile.open(QIODevice::ReadOnly))
+    {
+        zip.close();
+        return QByteArray();
+    }
+
+    QByteArray content = zipfile.readAll();
+    zipfile.close();
+    zip.close();
+    return content;
+#else
+    QProcess process;
+    process.start("unzip", QStringList() << "-p" << zipPath << entryName);
+    if (!process.waitForFinished(-1) || process.exitCode() != 0)
+    {
+        qLog(QString("Read zip entry failed: %1/%2, %3")
+             .arg(zipPath, entryName, QString::fromLocal8Bit(process.readAllStandardError())));
+        return QByteArray();
+    }
+
+    return process.readAllStandardOutput();
+#endif
+}
+
+bool ExtractZip(const QString& zipPath, const QString& dstPath)
+{
+#ifdef Q_OS_WIN32
+    return !JlCompress::extractDir(zipPath, dstPath).isEmpty();
+#else
+    QDir().mkpath(dstPath);
+
+    QProcess process;
+    process.start("unzip", QStringList() << "-o" << zipPath << "-d" << dstPath);
+    if (!process.waitForFinished(-1) || process.exitCode() != 0)
+    {
+        qLog(QString("Extract zip failed: %1 -> %2, %3")
+             .arg(zipPath, dstPath, QString::fromLocal8Bit(process.readAllStandardError())));
+        return false;
+    }
+
+    return true;
+#endif
+}
+
 int CompareVersion(QString& s1, QString& s2)
 {
-    QStringList sl1 = s1.split('.', Qt::SkipEmptyParts);
-    QStringList sl2 = s2.split('.', Qt::SkipEmptyParts);
+    QStringList sl1 = s1.split('.', QString::SkipEmptyParts);
+    QStringList sl2 = s2.split('.', QString::SkipEmptyParts);
 
     int count = sl1.size() > sl2.size() ? sl2.size() : sl1.size();
     for (int i = 0; i < count; i++)
@@ -363,7 +598,7 @@ QStringList SplitContent(QString& content)
         {
             if (!tmpStr.isEmpty())
             {
-                contentList.append(tmpStr);\
+                contentList.append(tmpStr);
                 tmpStr.clear();
             }
 
@@ -400,7 +635,7 @@ QPixmap ConvertColor(QPixmap& pixmap, QColor color)
 
 bool CheckUpdate(QString& version)
 {
-    QString repoUrl = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGo/main/repo.json";
+    QString repoUrl = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGoPlugin/main/repo.json";
     if (!GetSettings()->m_repo_url.isEmpty())
     {
         repoUrl = QString("%1/repo.json").arg(GetSettings()->m_repo_url);
@@ -423,4 +658,24 @@ bool CheckUpdate(QString& version)
     version = jsonObject["version"].toString();
 
     return true;
+}
+
+bool isUos()
+{
+#ifdef Q_OS_LINUX
+    static const bool isUosSystem = []() {
+        const QString id = readOsReleaseValue(QStringLiteral("ID")).trimmed().toLower();
+        if (id == QStringLiteral("uos"))
+        {
+            return true;
+        }
+
+        const QString name = readOsReleaseValue(QStringLiteral("NAME")).trimmed().toLower();
+        return name == QStringLiteral("uos");
+    }();
+
+    return isUosSystem;
+#else
+    return false;
+#endif
 }

@@ -18,8 +18,7 @@ public:
 public:
     void update();
     void updateIcon(QPixmap& pixmap);
-    void setTheme();
-    void setTheme(QColor& color);
+    void setTheme(QColor mainColorForImage = QColor());
 public:
     QString m_uuid;
     Result m_result;

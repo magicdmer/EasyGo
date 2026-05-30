@@ -38,11 +38,19 @@ typedef bool (*pQueryFunc)(char* pQuery, char* pResult, int* length);
 typedef void (*pUpdateSetting)();
 typedef void (*pClickFunc)(char* pData);
 
+#ifdef Q_OS_WIN32
 typedef bool (__stdcall *pEInitFunc)(char* pPluginPath);
 typedef const char* (__stdcall *pEMenuFunc)(char* result);
 typedef const char* (__stdcall *pEQueryFunc)(char* pQuery);
 typedef void (__stdcall *pEUpdateSetting)();
 typedef void (__stdcall *pEClickFunc)(char* pData);
+#else
+typedef bool (*pEInitFunc)(char* pPluginPath);
+typedef const char* (*pEMenuFunc)(char* result);
+typedef const char* (*pEQueryFunc)(char* pQuery);
+typedef void (*pEUpdateSetting)();
+typedef void (*pEClickFunc)(char* pData);
+#endif
 
 struct Query{
     QString rawQuery;
@@ -68,6 +76,10 @@ struct Result{
     QString iconPath;
     QString extraData;
     PluginAction action;
+
+    Result() {
+        showType = SHOW_TYPE_DEFAULT;
+    }
 };
 Q_DECLARE_METATYPE(Result)
 
@@ -89,6 +101,11 @@ struct PluginInfo{
     QString interpreterArgv;
     QString exeName;
     QString cfgPath;
+
+    PluginInfo() {
+        argc = 0;
+        enableSeparate = 0;
+    }
 };
 
 #ifdef Q_OS_WIN32

@@ -19,6 +19,15 @@
 #include "PluginManager.h"
 #include <QtConcurrent>
 #include <QFuture>
+#ifdef Q_OS_WIN32
+#include <shellapi.h>
+#include <windows.h>
+#endif
+#ifdef Q_OS_LINUX
+#include <QSettings>
+#include <QRegExp>
+#include <QStandardPaths>
+#endif
 
 QObject* g_fromMainDlg = nullptr;
 
@@ -179,7 +188,7 @@ bool Plugin::load()
         m_mode = RealMode;
     }
 
-    m_iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+    m_iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
 
     if (jsonObject.contains("AcceptType"))
     {
@@ -189,7 +198,7 @@ bool Plugin::load()
     if (jsonObject.contains("CfgPath"))
     {
         m_info.cfgPath = jsonObject["CfgPath"].toString();
-        m_cfgPath = m_path + QString("/%1").arg(m_info.cfgPath);
+        m_cfgPath = NormalizePath(m_path + QString("/%1").arg(m_info.cfgPath));
     }
 
     if (jsonObject.contains("Interpreter"))
@@ -412,15 +421,27 @@ void Plugin::Ra_OpenFileFolder(QString data,QObject* parent)
 {
     Q_UNUSED(parent);
 
-    //OpenFileFoler(data);
-
+#ifdef Q_OS_WIN32
     QProcess process;
     QString filePath = QDir::toNativeSeparators(data);
     QString cmdLine = QString("explorer /select,%1").arg(filePath);
     process.startDetached(cmdLine);
+#else
+    QFileInfo info(data);
+    if (!info.exists())
+    {
+        return;
+    }
+
+    QString fileFolder = info.path();
+    QStringList args;
+    args << fileFolder;
+    QProcess::startDetached("/usr/bin/xdg-open", args);
+#endif
 
 }
 
+#ifdef Q_OS_WIN32
 void Plugin::Ra_Open(QString data,QObject* parent)
 {
 	Q_UNUSED(parent);
@@ -474,15 +495,123 @@ void Plugin::Ra_Open(QString data,QObject* parent)
 	}
 
 }
+#else
+// 探测当前系统的 gio 是否支持 launch 子命令。部分发行版（如本机 UOS 的定制 glib）
+// 的 gio 没有 launch，但 QProcess::startDetached 只看进程是否拉起、看不到退出码，
+// 误判成功后就不会走兜底，导致回车时只打印 gio 用法、什么也启动不了。
+// gio help 列出的命令名是英文、不随语言本地化，可据此可靠判断；结果一次性缓存。
+static bool gioSupportsLaunch()
+{
+    static int cached = -1;
+    if (cached == -1)
+    {
+        QProcess probe;
+        probe.start("gio", QStringList() << "help");
+        if (probe.waitForFinished(2000))
+        {
+            const QString out = QString::fromUtf8(probe.readAllStandardOutput());
+            cached = out.contains(QRegExp("\\blaunch\\b")) ? 1 : 0;
+        }
+        else
+        {
+            cached = 0;
+        }
+    }
+    return cached == 1;
+}
+
+// gio 缺失时的兜底：自行解析 .desktop 的 Exec（去掉 field codes），保留必要参数启动。
+// 注意此路径不处理 Terminal=true / DBusActivatable，仅作 gio 不可用时的退路。
+static bool launchDesktopFileFallback(const QString& desktopPath)
+{
+    QSettings df(desktopPath, QSettings::IniFormat);
+    df.setIniCodec("UTF8");
+
+    QString exec = df.value("/Desktop Entry/Exec").toString();
+    exec = exec.replace(QRegExp("%[a-zA-Z]"), "").trimmed();   // 删除 %u/%f/%U/%F 等字段码
+    if (exec.isEmpty())
+    {
+        return false;
+    }
+
+    QStringList parts = exec.split(' ', QString::SkipEmptyParts);
+    const QString program = parts.takeFirst();                 // 其余为必要参数，保留
+
+    QProcess process;
+    const QString workDir = df.value("/Desktop Entry/Path").toString();
+    if (!workDir.isEmpty())
+    {
+        process.setWorkingDirectory(workDir);
+    }
+    process.setProgram(program);
+    process.setArguments(parts);
+    return process.startDetached();
+}
+
+void Plugin::Ra_Open(QString data,QObject* parent)
+{
+    Q_UNUSED(parent);
+
+    // 程序索引传入的是 .desktop 路径：交给系统启动器按 freedesktop 规范启动，
+    // 自动处理 Exec 参数、字段码、Terminal=true、DBusActivatable、工作目录等。
+    if (data.endsWith(".desktop") && QFileInfo::exists(data))
+    {
+        if (gioSupportsLaunch() && QProcess::startDetached("gio", QStringList() << "launch" << data))
+        {
+            return;
+        }
+        launchDesktopFileFallback(data);    // gio 无 launch 子命令时退回自行解析
+        return;
+    }
+
+    // 其余情况（如右键菜单"打开"传入的可执行文件路径）：保持原有逻辑
+    QString exePath,para;
+    exePath = data;
+
+    int num = data.count("\"");
+    if (num == 2)
+    {
+        int index = data.lastIndexOf("\"");
+        para = data.mid(index+2);
+        exePath = data.mid(0,index+1);
+        exePath = exePath.remove("\"");
+    }
+
+    QFileInfo fileInfo(exePath);
+
+    if (fileInfo.isExecutable())
+    {
+        QProcess process;
+        process.setWorkingDirectory(fileInfo.path());
+        if (!para.isEmpty())
+        {
+            process.setArguments(para.split(" "));
+        }
+        process.startDetached(exePath);
+    }
+    else
+    {
+        QStringList args;
+        args << exePath;
+        QProcess::startDetached("/usr/bin/xdg-open", args);
+    }
+}
+#endif
 
 void Plugin::Ra_OpenWeb(QString data,QObject* parent)
 {
     Q_UNUSED(parent);
 
+#ifdef Q_OS_WIN32
     QTextCodec* gbk = QTextCodec::codecForName("gbk");
     QByteArray gbkByteArray = gbk->fromUnicode(data);
 
     ShellExecuteA(0,"open",gbkByteArray.data(),0,0,SW_SHOWNORMAL);
+#else
+    QStringList args;
+    args << data;
+    QProcess::startDetached("/usr/bin/xdg-open", args);
+#endif
 }
 
 void Plugin::Ra_EditFile(QString parameter, QObject* parent)
@@ -568,7 +697,7 @@ void Plugin::Ra_StopMusic(QString parameter,QObject* parent)
 
 bool CPlusPlugin::initPlugin(QString pluginPath)
 {
-    QString exePath = m_path + QString("/%1").arg(m_info.exeName);
+    QString exePath = NormalizePath(m_path + QString("/%1").arg(m_info.exeName));
 
     int index = exePath.lastIndexOf(".");
     QString libraryName = exePath.mid(0,index);
@@ -678,7 +807,7 @@ bool CPlusPlugin::query(Query query,QVector<Result>& vecResult)
         QString iconPath = resultObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            result.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            result.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -688,7 +817,7 @@ bool CPlusPlugin::query(Query query,QVector<Result>& vecResult)
             }
             else
             {
-                result.iconPath = m_path + QString("/%1").arg(iconPath);
+                result.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -778,7 +907,7 @@ bool CPlusPlugin::getMenu(Result& result ,QVector<Result>& vecMenu)
         QString iconPath = menuObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            menu.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            menu.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -788,7 +917,7 @@ bool CPlusPlugin::getMenu(Result& result ,QVector<Result>& vecMenu)
             }
             else
             {
-                menu.iconPath = m_path + QString("/%1").arg(iconPath);
+                menu.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -826,13 +955,15 @@ void CPlusPlugin::itemClick(Result& item,QObject* parent)
 
     if (action.funcName.startsWith("Ra_"))
     {
+#ifdef Q_OS_WIN32
         PVOID OldValue;
         Wow64DisableWow64FsRedirection (&OldValue);
-
+#endif
         QByteArray ba = action.funcName.toUtf8();
         QMetaObject::invokeMethod(this,ba.data(),Q_ARG(QString,action.parameter),Q_ARG(QObject*,parent));
-
+#ifdef Q_OS_WIN32
         Wow64RevertWow64FsRedirection (OldValue);
+#endif
     }
     else
     {
@@ -859,8 +990,8 @@ PythonPlugin::PythonPlugin(QString &pluginPath):Plugin(pluginPath)
 {
     QString programPath = QDir::currentPath();
     m_jsonRpcPath = programPath + QString("/JsonRPC");
-    m_jsonRpcPath = m_jsonRpcPath.replace("/","\\");
 
+#ifdef Q_OS_WIN32
     if (GetSettings()->m_pythonPath.isEmpty())
     {
         m_pythonPath = "pythonw.exe";
@@ -869,6 +1000,16 @@ PythonPlugin::PythonPlugin(QString &pluginPath):Plugin(pluginPath)
     {
         m_pythonPath = GetSettings()->m_pythonPath + QString("/pythonw.exe");
     }
+#else
+    if (GetSettings()->m_pythonPath.isEmpty())
+    {
+        m_pythonPath = "python3";
+    }
+    else
+    {
+        m_pythonPath = GetSettings()->m_pythonPath + QString("/python3");
+    }
+#endif
 }
 
 bool PythonPlugin::initPlugin(QString pluginPath)
@@ -934,7 +1075,7 @@ bool PythonPlugin::query(Query query,QVector<Result>& vecResult)
         QString iconPath = resultObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            result.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            result.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -944,7 +1085,7 @@ bool PythonPlugin::query(Query query,QVector<Result>& vecResult)
             }
             else
             {
-                result.iconPath = m_path + QString("/%1").arg(iconPath);
+                result.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1015,7 +1156,7 @@ bool PythonPlugin::getMenu(Result& result,QVector<Result>& vecMenu)
         QString iconPath = menuObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            menu.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            menu.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -1025,7 +1166,7 @@ bool PythonPlugin::getMenu(Result& result,QVector<Result>& vecMenu)
             }
             else
             {
-                menu.iconPath = m_path + QString("/%1").arg(iconPath);
+                menu.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1057,13 +1198,15 @@ void PythonPlugin::itemClick(Result &item,QObject* parent)
 
     if (action.funcName.startsWith("Ra_"))
     {
+#ifdef Q_OS_WIN32
         PVOID OldValue;
         Wow64DisableWow64FsRedirection (&OldValue);
-
+#endif
         QByteArray ba = action.funcName.toUtf8();
         QMetaObject::invokeMethod(this,ba.data(),Q_ARG(QString,action.parameter),Q_ARG(QObject*,parent));
-
+#ifdef Q_OS_WIN32
         Wow64RevertWow64FsRedirection (OldValue);
+#endif
 
     }
     else
@@ -1071,7 +1214,7 @@ void PythonPlugin::itemClick(Result &item,QObject* parent)
         QString output = execute(action.funcName,action.parameter);
         if (!output.isEmpty())
         {
-            QStringList funcList = output.split("\r\n",QString::SkipEmptyParts);
+            QStringList funcList = output.split("\n",QString::SkipEmptyParts);
 
             foreach (QString func,funcList)
             {
@@ -1112,7 +1255,7 @@ QString PythonPlugin::execute(QString funcName,QString parameter)
     document.setObject(json);
     QByteArray byte_array = document.toJson(QJsonDocument::Compact);
 
-    QString modPath = m_path + QString("/%1").arg(m_info.exeName);
+    QString modPath = NormalizePath(m_path + QString("/%1").arg(m_info.exeName));
 
     QStringList args;
     args.append("-B");
@@ -1135,7 +1278,7 @@ QString PythonPlugin::execute(QString funcName,QString parameter)
 
 bool EPlugin::initPlugin(QString pluginPath)
 {
-    QString exePath = m_path + QString("/%1").arg(m_info.exeName);
+    QString exePath = NormalizePath(m_path + QString("/%1").arg(m_info.exeName));
 
     int index = exePath.lastIndexOf(".");
     QString libraryName = exePath.mid(0,index);
@@ -1231,7 +1374,7 @@ bool EPlugin::query(Query query,QVector<Result>& vecResult)
         QString iconPath = resultObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            result.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            result.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -1241,7 +1384,7 @@ bool EPlugin::query(Query query,QVector<Result>& vecResult)
             }
             else
             {
-                result.iconPath = m_path + QString("/%1").arg(iconPath);
+                result.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1317,7 +1460,7 @@ bool EPlugin::getMenu(Result& result ,QVector<Result>& vecMenu)
         QString iconPath = menuObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            menu.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            menu.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -1327,7 +1470,7 @@ bool EPlugin::getMenu(Result& result ,QVector<Result>& vecMenu)
             }
             else
             {
-                menu.iconPath = m_path + QString("/%1").arg(iconPath);
+                menu.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1365,13 +1508,15 @@ void EPlugin::itemClick(Result& item,QObject* parent)
 
     if (action.funcName.startsWith("Ra_"))
     {
+#ifdef Q_OS_WIN32
         PVOID OldValue;
         Wow64DisableWow64FsRedirection (&OldValue);
-
+#endif
         QByteArray ba = action.funcName.toUtf8();
         QMetaObject::invokeMethod(this,ba.data(),Q_ARG(QString,action.parameter),Q_ARG(QObject*,parent));
-
+#ifdef Q_OS_WIN32
         Wow64RevertWow64FsRedirection (OldValue);
+#endif
     }
     else
     {
@@ -1462,7 +1607,7 @@ bool PowerShellPlugin::query(Query query,QVector<Result>& vecResult)
         QString iconPath = resultObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            result.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            result.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -1472,7 +1617,7 @@ bool PowerShellPlugin::query(Query query,QVector<Result>& vecResult)
             }
             else
             {
-                result.iconPath = m_path + QString("/%1").arg(iconPath);
+                result.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1543,7 +1688,7 @@ bool PowerShellPlugin::getMenu(Result& result,QVector<Result>& vecMenu)
         QString iconPath = menuObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            menu.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            menu.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -1553,7 +1698,7 @@ bool PowerShellPlugin::getMenu(Result& result,QVector<Result>& vecMenu)
             }
             else
             {
-                menu.iconPath = m_path + QString("/%1").arg(iconPath);
+                menu.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1585,13 +1730,15 @@ void PowerShellPlugin::itemClick(Result &item,QObject* parent)
 
     if (action.funcName.startsWith("Ra_"))
     {
+#ifdef Q_OS_WIN32
         PVOID OldValue;
         Wow64DisableWow64FsRedirection (&OldValue);
-
+#endif
         QByteArray ba = action.funcName.toUtf8();
         QMetaObject::invokeMethod(this,ba.data(),Q_ARG(QString,action.parameter),Q_ARG(QObject*,parent));
-
+#ifdef Q_OS_WIN32
         Wow64RevertWow64FsRedirection (OldValue);
+#endif
 
     }
     else
@@ -1599,7 +1746,7 @@ void PowerShellPlugin::itemClick(Result &item,QObject* parent)
         QString output = execute(action.funcName,action.parameter);
         if (!output.isEmpty())
         {
-            QStringList funcList = output.split("\r\n",QString::SkipEmptyParts);
+            QStringList funcList = output.split("\n",QString::SkipEmptyParts);
 
             foreach (QString func,funcList)
             {
@@ -1724,7 +1871,7 @@ bool ScriptPlugin::query(Query query,QVector<Result>& vecResult)
         QString iconPath = resultObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            result.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            result.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -1734,7 +1881,7 @@ bool ScriptPlugin::query(Query query,QVector<Result>& vecResult)
             }
             else
             {
-                result.iconPath = m_path + QString("/%1").arg(iconPath);
+                result.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1805,7 +1952,7 @@ bool ScriptPlugin::getMenu(Result& result,QVector<Result>& vecMenu)
         QString iconPath = menuObj["IconPath"].toString();
         if (iconPath.isEmpty())
         {
-            menu.iconPath = m_path + QString("/%1").arg(m_info.iconPath);
+            menu.iconPath = NormalizePath(m_path + QString("/%1").arg(m_info.iconPath));
         }
         else
         {
@@ -1815,7 +1962,7 @@ bool ScriptPlugin::getMenu(Result& result,QVector<Result>& vecMenu)
             }
             else
             {
-                menu.iconPath = m_path + QString("/%1").arg(iconPath);
+                menu.iconPath = NormalizePath(m_path + QString("/%1").arg(iconPath));
             }
         }
 
@@ -1847,13 +1994,15 @@ void ScriptPlugin::itemClick(Result &item,QObject* parent)
 
     if (action.funcName.startsWith("Ra_"))
     {
+#ifdef Q_OS_WIN32
         PVOID OldValue;
         Wow64DisableWow64FsRedirection (&OldValue);
-
+#endif
         QByteArray ba = action.funcName.toUtf8();
         QMetaObject::invokeMethod(this,ba.data(),Q_ARG(QString,action.parameter),Q_ARG(QObject*,parent));
-
+#ifdef Q_OS_WIN32
         Wow64RevertWow64FsRedirection (OldValue);
+#endif
 
     }
     else
@@ -1861,7 +2010,7 @@ void ScriptPlugin::itemClick(Result &item,QObject* parent)
         QString output = execute(action.funcName,action.parameter);
         if (!output.isEmpty())
         {
-            QStringList funcList = output.split("\r\n",QString::SkipEmptyParts);
+            QStringList funcList = output.split("\n",QString::SkipEmptyParts);
 
             foreach (QString func,funcList)
             {
@@ -1900,7 +2049,7 @@ QString ScriptPlugin::execute(QString funcName,QString parameter)
 
     QStringList args;
     if (!m_info.interpreterArgv.isEmpty())
-        args.append(m_info.interpreterArgv.split(" ", Qt::SkipEmptyParts));
+        args.append(m_info.interpreterArgv.split(" ", QString::SkipEmptyParts));
     args.append("./" + m_info.exeName);
     args.append(byte_array);
     process.setArguments(args);

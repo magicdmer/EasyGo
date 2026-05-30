@@ -11,8 +11,8 @@ public:
 public:
     bool load();
     bool save();
-    int getScore(QString& key);
-    void addScore(QString& key);
+    int getScore(const QString& key);
+    void addScore(const QString& key);
 private:
     QMap<QString,int> m_records;
 };

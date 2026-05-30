@@ -1,4 +1,4 @@
-#ifndef USAGESETTING_H
+﻿#ifndef USAGESETTING_H
 #define USAGESETTING_H
 
 

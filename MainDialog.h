@@ -11,6 +11,7 @@
 #include <QTimer>
 #include "MyLineEdit.h"
 #include <QProgressBar>
+#include "LineProgressBar.h"
 #include "qxtglobalshortcut.h"
 #include "IconExtractor.h"
 #include "ShowContentDlg.h"
@@ -88,6 +89,7 @@ private:
     void resetInputState();
     void createTextEditMenu();
     void copyImageFromTextEdit();
+    void updateIconColors(const QColor& textColor);
 
 private:
     Ui::MainDialog *ui;
@@ -100,7 +102,7 @@ private:
     QAction* m_exit;
     MyListWidget* m_listWidget;
     MyLineEdit* m_lineEdit;
-    QProgressBar* m_progressbar;
+    LineProgressBar* m_progressbar;
     QTextEdit* m_textEdit;
 	bool m_move;
     QPoint m_lastPoint;

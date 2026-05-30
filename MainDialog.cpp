@@ -8,6 +8,7 @@
 #include "Settings.h"
 #include "LogFile.h"
 #include "ThemeSetting.h"
+#include "LineProgressBar.h"
 #include <QMessageBox>
 #include "AboutDialog.h"
 #include <QDragEnterEvent>
@@ -23,9 +24,6 @@
 #include <QScrollBar>
 #include "TaskManager.h"
 #include "UsageSetting.h"
-#include "quazip.h"
-#include "quazipfile.h"
-#include "JlCompress.h"
 #include "HelperFunc.h"
 #include "InstallDlg.h"
 #include <QBitmap>
@@ -129,14 +127,14 @@ MainDialog::MainDialog(QWidget *parent) :
     m_lineEdit->setGeometry(5,5,m_width - 10, 60);
     m_lineEdit->setFrame(false);
     m_lineEdit->setContextMenuPolicy(Qt::NoContextMenu);
-    m_lineEdit->setFont(QFont(tr("Arial"),18,QFont::Bold));
+    m_lineEdit->setFont(GetUiFont(18, QFont::Bold));
 
     connect(m_lineEdit,SIGNAL(textChanged(QString)),this,SLOT(sltTextChanged(QString)));
     connect(m_lineEdit,SIGNAL(clicked()),this,SLOT(sltLineEditClick()));
 
 
     //进度条
-    m_progressbar = new QProgressBar(this);
+    m_progressbar = new LineProgressBar(this);
     m_progressbar->setGeometry(5,66,m_width - 10,2);
     m_progressbar->setValue(0);
     m_progressbar->setTextVisible(false);
@@ -159,7 +157,7 @@ MainDialog::MainDialog(QWidget *parent) :
     m_textEdit->setFrameShape(QFrame::NoFrame);
     m_textEdit->setFrameShadow(QFrame::Plain);
     m_textEdit->setReadOnly(true);
-    m_textEdit->setFont(QFont(tr("Arial"),13,QFont::Normal));
+    m_textEdit->setFont(GetUiFont(13, QFont::Normal));
     m_textEdit->hide();
     createTextEditMenu();
 
@@ -195,11 +193,16 @@ MainDialog::MainDialog(QWidget *parent) :
     connect(m_typingTimer, SIGNAL(timeout()),this, SLOT(sltFilterEntries()));
 
     connect(&m_iconExtractor,SIGNAL(iconExtracted(int,QPixmap)),this,SLOT(sltIconExtracted(int,QPixmap)));
-    m_shortcut = new QxtGlobalShortcut(QKeySequence(),this);
+    
+    m_shortcut = nullptr;
     m_hotKey = GetSettings()->m_hotKey;
-    if (m_shortcut->setShortcut(QKeySequence(m_hotKey)))
+    if (!isUos())
     {
-        connect(m_shortcut,SIGNAL(activated()),this,SLOT(sltHotKey()));
+        m_shortcut = new QxtGlobalShortcut(QKeySequence(),this);
+        if (m_shortcut->setShortcut(QKeySequence(m_hotKey)))
+        {
+            connect(m_shortcut,SIGNAL(activated()),this,SLOT(sltHotKey()));
+        }
     }
 
     m_checkActive = new QTimer( this );
@@ -419,7 +422,7 @@ void MainDialog::sltFilterEntries()
     }
 
     if (m_inputState.primaryMode != EnterInput || m_forceQuery ||
-         query.parameter.split(' ',Qt::SkipEmptyParts).size() < plugin->m_info.argc)
+         query.parameter.split(' ',QString::SkipEmptyParts).size() < plugin->m_info.argc)
     {
         m_progressbar->show();
         if (m_inputState.primaryMode == DropInput && !m_inputState.isSecondary)
@@ -754,7 +757,10 @@ void MainDialog::sltSet()
     if (hotKey != m_hotKey)
     {
         m_hotKey = hotKey;
-        m_shortcut->setShortcut(QKeySequence(m_hotKey));
+        if (m_shortcut)
+        {
+            m_shortcut->setShortcut(QKeySequence(m_hotKey));
+        }
     }
 }
 
@@ -784,216 +790,101 @@ void MainDialog::sltExit()
     exit(0);
 }
 
+void MainDialog::updateIconColors(const QColor& textColor)
+{
+    QPixmap pixmap(":/Images/play.png");
+    m_playPixmap = ConvertColor(pixmap, textColor);
+    pixmap.load(":/Images/pause.png");
+    m_pausePixmap = ConvertColor(pixmap, textColor);
+}
+
 void MainDialog::setTheme()
 {
-    QString scrollStyleSheet = QString("QScrollBar {"
-        "    border: 1px solid #999999;"
-        "    background:white;"
-        "    width:10px;    "
-        "    margin: 0px 0px 0px 0px;"
-        "}"
-        "QScrollBar::handle {"
-        "    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
-        "    stop: 0 %1, stop: 0.5 %1, stop:1 %1);"
-        "    min-height: 0px;"
-        "}"
-        "QScrollBar::add-line {"
-        "    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
-        "    stop: 0 %1, stop: 0.5 %1,  stop:1 %1);"
-        "    height: 0px;"
-        "    subcontrol-position: bottom;"
-        "    subcontrol-origin: margin;"
-        "}"
-        "QScrollBar::sub-line {"
-        "    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
-        "    stop: 0  %1, stop: 0.5 %1,  stop:1 %1);"
-        "    height: 0 px;"
-        "    subcontrol-position: top;"
-        "    subcontrol-origin: margin;"
-        "}"
-    );
-
     Theme* theme = GetThemeSetting()->getSelectTheme();
-    if (theme)
+    if (!theme) return;
+
+    if (m_curThemeType != theme->type || m_roundCorner != GetThemeSetting()->m_roundCorner)
     {
-        if (m_curThemeType != theme->type || m_roundCorner != GetThemeSetting()->m_roundCorner)
+        if (QMessageBox::No == QMessageBox::information(this, tr("提示"), tr("需要重启程序，是否切换？"), QMessageBox::Yes | QMessageBox::No))
         {
-            if (QMessageBox::No == QMessageBox::information(this, tr("提示"), tr("需要重启程序，是否切换？"), QMessageBox::Yes | QMessageBox::No))
-            {
-                return;
-            }
-
-            qApp->exit(773);
+            return;
         }
 
-        setWindowOpacity(theme->win_opacity);
+        qApp->exit(773);
+    }
 
-        if (!theme->type)
-        {
-            m_mainColor = ToColor(theme->child_win_color);
-            if (theme->child_win_color.isEmpty())
-            {
-                m_mainColor = ToColor(theme->win_color);
-            }
+    setWindowOpacity(theme->win_opacity);
 
-            m_initHeight = 70;
+    if (!theme->type)
+    {
+        m_mainColor = GetThemeSetting()->resolvedChildWinColor();
 
-            resize(m_width, 70);
+        m_initHeight = 70;
+        resize(m_width, 70);
 
-            m_lineEdit->setGeometry(5, 5, m_width - 10, 60);
-            m_progressbar->setGeometry(5, 66, m_width - 10, 2);
-            m_listWidget->setGeometry(5, 70, m_width - 10, 60);
-            m_textEdit->setGeometry(5, 70, m_width - 10, 60 * GetSettings()->m_maxResultsPerPage);
+        m_lineEdit->setGeometry(5, 5, m_width - 10, 60);
+        m_progressbar->setGeometry(5, 66, m_width - 10, 2);
+        m_listWidget->setGeometry(5, 70, m_width - 10, 60);
+        m_textEdit->setGeometry(5, 70, m_width - 10, 60 * GetSettings()->m_maxResultsPerPage);
 
-            QString styleSheet = QString("MainDialog{background-color: rgb(%1);}").
-                arg(theme->win_color);
-            setStyleSheet(styleSheet);
+        setStyleSheet(QString("MainDialog{background-color: rgb(%1);}").arg(theme->win_color));
 
-            styleSheet.clear();
-
-            QString child_win_color = theme->child_win_color.isEmpty() ? theme->win_color : theme->child_win_color;
-
-            if (theme->text_color.isEmpty())
-            {
-                double brightness = GetPngBrightness(m_mainColor);
-                if (brightness < 100)
-                {
-                    styleSheet = QString("background-color: rgb(%1);color:white;"
-                                         "selection-background-color: #3399FF;"
-                                         "selection-color: white;").
-                                        arg(child_win_color);
-                    QPixmap pixmap(":/Images/play.png");
-                    m_playPixmap = ConvertColor(pixmap,QColor(Qt::white));
-                    pixmap.load(":/Images/pause.png");
-                    m_pausePixmap = ConvertColor(pixmap,QColor(Qt::white));
-                }
-                else
-                {
-                    styleSheet = QString("background-color: rgb(%1);color:black;"
-                                         "selection-background-color: #3399FF;"
-                                         "selection-color: white;").
-                                        arg(child_win_color);
-                    QPixmap pixmap(":/Images/play.png");
-                    m_playPixmap = ConvertColor(pixmap,QColor(Qt::black));
-                    pixmap.load(":/Images/pause.png");
-                    m_pausePixmap = ConvertColor(pixmap,QColor(Qt::black));
-                }
-            }
-            else
-            {
-                styleSheet = QString("background-color: rgb(%1);color:rgb(%2);"
+        QColor textColor = GetThemeSetting()->resolvedTextColor();
+        QColor childWinColor = GetThemeSetting()->resolvedChildWinColor();
+        QString styleSheet = QString("background-color: %1;color: %2;"
                                      "selection-background-color: #3399FF;"
-                                     "selection-color: white;").
-                                    arg(child_win_color).arg(theme->text_color);
-                QPixmap pixmap(":/Images/play.png");
-                m_playPixmap = ConvertColor(pixmap,ToColor(theme->text_color));
-                pixmap.load(":/Images/pause.png");
-                m_pausePixmap = ConvertColor(pixmap,ToColor(theme->text_color));
-            }
+                                     "selection-color: white;")
+                                    .arg(childWinColor.name()).arg(textColor.name());
 
-            m_lineEdit->setStyleSheet(styleSheet);
-            m_textEdit->setStyleSheet(styleSheet);
+        m_lineEdit->setStyleSheet(styleSheet);
+        m_textEdit->setStyleSheet(styleSheet);
 
-            QColor scrollbar_color = ToColor(theme->scrollbar_color);
-            if (theme->scrollbar_color.isEmpty())
-            {
-                scrollbar_color = ToColor(child_win_color).darker(125);
-            }
-            scrollStyleSheet = scrollStyleSheet.replace("%1", scrollbar_color.name());
-            m_textEdit->verticalScrollBar()->setStyleSheet(scrollStyleSheet);
-            m_textEdit->horizontalScrollBar()->setStyleSheet(scrollStyleSheet);
+        updateIconColors(textColor);
+    }
+    else
+    {
+        QPixmap pixmap(theme->image_path);
+        m_pixmap = pixmap.scaledToWidth(m_width);
+        resize(m_pixmap.size());
+        m_initHeight = m_pixmap.height();
 
-            m_listWidget->setTheme();
+        m_mainColor = PixmapMainColor(m_pixmap, 1);
+        QPoint realPosition = RealPointFromAlphaPng(m_pixmap);
 
-            for (int i = 0; i < m_listWidget->count(); i++)
-            {
-                ResultItem* rItem = m_listWidget->getItem(i);
-                if (rItem)
-                {
-                    rItem->setTheme();
-                }
-            }
-        }
-        else
+        m_lineEdit->setGeometry(10, realPosition.y() + 5, m_width - 20, height() - realPosition.y() - 10);
+        m_progressbar->setGeometry(10, realPosition.y() + 5 + m_lineEdit->height() + 1, m_width - 20, 2);
+        m_listWidget->setGeometry(0, height() - 1, m_width, 60);
+        m_textEdit->setGeometry(0, height() - 1, m_width, 60 * GetSettings()->m_maxResultsPerPage);
+
+        setStyleSheet(QString("MainDialog{background-color: %1;}").arg(m_mainColor.name()));
+
+        QColor textColor = GetThemeSetting()->resolvedTextColor(m_mainColor);
+
+        m_lineEdit->setStyleSheet(QString("background-color: transparent;color: %1;").arg(textColor.name()));
+        m_textEdit->setStyleSheet(QString("background-color: %1;color: %2;"
+                                          "selection-background-color: #3399FF;"
+                                          "selection-color: white;")
+                                         .arg(m_mainColor.name()).arg(textColor.name()));
+
+        updateIconColors(textColor);
+    }
+
+    // 公共部分：滚动条 + 列表/结果项主题
+    QColor scrollbarColor = GetThemeSetting()->resolvedScrollbarColor(m_mainColor);
+    QColor childWinColor = GetThemeSetting()->resolvedChildWinColor(m_mainColor);
+    QString scrollStyleSheet = ThemeSetting::scrollbarStyleSheet(scrollbarColor, childWinColor);
+    m_textEdit->verticalScrollBar()->setStyleSheet(scrollStyleSheet);
+    m_textEdit->horizontalScrollBar()->setStyleSheet(scrollStyleSheet);
+
+    m_listWidget->setTheme(m_mainColor);
+
+    for (int i = 0; i < m_listWidget->count(); i++)
+    {
+        ResultItem* rItem = m_listWidget->getItem(i);
+        if (rItem)
         {
-            QPixmap pixmap(theme->image_path);
-            m_pixmap = pixmap.scaledToWidth(m_width);
-            resize(m_pixmap.size());
-            m_initHeight = m_pixmap.height();
-
-            m_mainColor = PixmapMainColor(m_pixmap, 1);
-            QPoint realPosition = RealPointFromAlphaPng(m_pixmap);
-
-            m_lineEdit->setGeometry(10, realPosition.y() + 5, m_width - 20, height() - realPosition.y() - 10);
-            m_progressbar->setGeometry(10, realPosition.y() + 5 + m_lineEdit->height() + 1, m_width - 20, 2);
-            m_listWidget->setGeometry(0, height() - 1, m_width, 60);
-            m_textEdit->setGeometry(0, height() - 1, m_width, 60 * GetSettings()->m_maxResultsPerPage);
-
-            setStyleSheet(tr("MainDialog{background-color: %1;}").arg(m_mainColor.name()));
-
-            if (theme->text_color.isEmpty())
-            {
-                double brightness = GetPngBrightness(m_mainColor);
-                if (brightness < 100)
-                {
-                    m_lineEdit->setStyleSheet("background-color: transparent;color:white");
-                    m_textEdit->setStyleSheet(tr("background-color: %1;color:white;"
-                                                 "selection-background-color: #3399FF;"
-                                                 "selection-color: white;").
-                                                arg(m_mainColor.name()));
-                    QPixmap pixmap(":/Images/play.png");
-                    m_playPixmap = ConvertColor(pixmap,QColor(Qt::white));
-                    pixmap.load(":/Images/pause.png");
-                    m_pausePixmap = ConvertColor(pixmap,QColor(Qt::white));
-                }
-                else
-                {
-                    m_lineEdit->setStyleSheet("background-color: transparent;color:black");
-                    m_textEdit->setStyleSheet(tr("background-color: %1;color:black;"
-                                                 "selection-background-color: #3399FF;"
-                                                 "selection-color: white;").
-                                                arg(m_mainColor.name()));
-                    QPixmap pixmap(":/Images/play.png");
-                    m_playPixmap = ConvertColor(pixmap,QColor(Qt::black));
-                    pixmap.load(":/Images/pause.png");
-                    m_pausePixmap = ConvertColor(pixmap,QColor(Qt::black));
-                }
-            }
-            else
-            {
-                m_lineEdit->setStyleSheet(tr("background-color: transparent;color:rgb(%1)").arg(theme->text_color));
-                m_textEdit->setStyleSheet(tr("background-color: %1;color:rgb(%2);"
-                                             "selection-background-color: #3399FF;"
-                                             "selection-color: white;").
-                                            arg(m_mainColor.name()).arg(theme->text_color));
-                QPixmap pixmap(":/Images/play.png");
-                m_playPixmap = ConvertColor(pixmap,ToColor(theme->text_color));
-                pixmap.load(":/Images/pause.png");
-                m_pausePixmap = ConvertColor(pixmap,ToColor(theme->text_color));
-            }
-
-            QColor scrollbar_color = ToColor(theme->scrollbar_color);
-            if (theme->scrollbar_color.isEmpty())
-            {
-                scrollbar_color = m_mainColor.darker(125);
-            }
-            scrollStyleSheet = scrollStyleSheet.replace("%1", scrollbar_color.name());
-            m_textEdit->verticalScrollBar()->setStyleSheet(scrollStyleSheet);
-            m_textEdit->horizontalScrollBar()->setStyleSheet(scrollStyleSheet);
-
-            m_listWidget->setTheme(m_mainColor);
-
-            for (int i = 0; i < m_listWidget->count(); i++)
-            {
-                ResultItem* rItem = m_listWidget->getItem(i);
-                if (rItem)
-                {
-                    rItem->setTheme(m_mainColor);
-                }
-            }
-
+            rItem->setTheme(m_mainColor);
         }
-
     }
 }
 
@@ -1531,29 +1422,16 @@ bool MainDialog::eventFilter(QObject *obj, QEvent *event)
 
 void MainDialog::installPlugin(QString& filePath)
 {
+#ifdef Q_OS_WIN32
     filePath = filePath.replace("/","\\");
+#endif
 
-    QuaZip zip(filePath);
-    if (!zip.open(QuaZip::mdUnzip))
+    QByteArray pluginContent = ReadZipEntry(filePath, "plugin.json");
+    if (pluginContent.isEmpty())
     {
-        QMessageBox::information(this,tr("提示"),tr("打开插件失败"));
-        return;
-    }
-
-    zip.setCurrentFile("plugin.json");
-
-    QuaZipFile zipfile(&zip);
-    if (!zipfile.open(QIODevice::ReadOnly))
-    {
-        zip.close();
         QMessageBox::information(this,tr("提示"),tr("找不到插件信息"));
         return;
     }
-
-    QByteArray pluginContent = zipfile.readAll();
-
-    zipfile.close();
-    zip.close();
 
     QJsonParseError parseJsonErr;
     QJsonDocument document = QJsonDocument::fromJson(pluginContent, &parseJsonErr);
@@ -1574,11 +1452,13 @@ void MainDialog::installPlugin(QString& filePath)
 
     if (pluginType == "python")
     {
+#ifdef Q_OS_WIN32
         if (GetSettings()->m_pythonPath.isEmpty())
         {
             QMessageBox::information(this,tr("提示"),tr("该插件需要依赖python环境，请设置后安装"));
             return;
         }
+#endif
     }
 
     InstallDlg dlg(this);
@@ -1642,8 +1522,7 @@ void MainDialog::installPlugin(QString& filePath)
         }
     }
 
-    QStringList extractFiles = JlCompress::extractDir(filePath,pluginPath);
-    if (extractFiles.isEmpty())
+    if (!ExtractZip(filePath, pluginPath))
     {
         QMessageBox::information(this,tr("提示"),tr("解压插件失败"));
         return;

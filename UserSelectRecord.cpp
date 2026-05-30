@@ -12,7 +12,7 @@ UserSelectRecord::UserSelectRecord()
 
 bool UserSelectRecord::load()
 {
-    QFile file("Settings\\UserSelectRecord.json");
+    QFile file("Settings/UserSelectRecord.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return false;
@@ -63,7 +63,7 @@ bool UserSelectRecord::save()
 
     QByteArray byte_array = document.toJson(QJsonDocument::Indented);
 
-    QFile file("Settings\\UserSelectRecord.json");
+    QFile file("Settings/UserSelectRecord.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return false;
@@ -75,7 +75,7 @@ bool UserSelectRecord::save()
     return true;
 }
 
-int UserSelectRecord::getScore(QString &key)
+int UserSelectRecord::getScore(const QString &key)
 {
     if (m_records.contains(key))
     {
@@ -85,7 +85,7 @@ int UserSelectRecord::getScore(QString &key)
     return 0;
 }
 
-void UserSelectRecord::addScore(QString &key)
+void UserSelectRecord::addScore(const QString &key)
 {
     int score = m_records[key];
     m_records[key] = score + 1;

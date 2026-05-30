@@ -12,7 +12,7 @@ TopMostRecord::TopMostRecord()
 
 bool TopMostRecord::load()
 {
-    QFile file("Settings\\TopMostRecord.json");
+    QFile file("Settings/TopMostRecord.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return false;
@@ -63,7 +63,7 @@ bool TopMostRecord::save()
 
     QByteArray byte_array = document.toJson(QJsonDocument::Indented);
 
-    QFile file("Settings\\TopMostRecord.json");
+    QFile file("Settings/TopMostRecord.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return false;

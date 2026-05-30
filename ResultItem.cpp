@@ -43,69 +43,24 @@ void ResultItem::update()
     m_uuid = m_result.id;
 }
 
-void ResultItem::setTheme()
+void ResultItem::setTheme(QColor mainColorForImage)
 {
     Theme* theme = GetThemeSetting()->getSelectTheme();
-    if (theme && !theme->type)
-    {
-        if (!theme->text_color.isEmpty())
-        {
-            ui->labelTitle->setStyleSheet(QString("color:rgb(%1)").arg(theme->text_color));
-            ui->labelSubTitle->setStyleSheet(QString("color:rgb(%1)").arg(theme->text_color));
-        }
-        else
-        {
-            QColor child_win_color = ToColor(theme->child_win_color);
-            if (theme->child_win_color.isEmpty())
-            {
-                child_win_color = ToColor(theme->win_color);
-            }
+    if (!theme) return;
 
-            double brightness = GetPngBrightness(child_win_color);
-            if (brightness < 100)
-            {
-                ui->labelTitle->setStyleSheet("color: white");
-                ui->labelSubTitle->setStyleSheet("color: white");
-            }
-            else
-            {
-                ui->labelTitle->setStyleSheet("color: black");
-                ui->labelSubTitle->setStyleSheet("color: black");
-            }
-        }
+    QColor textColor = GetThemeSetting()->resolvedTextColor(mainColorForImage);
 
-        ui->labelTitle->setFont(QFont(tr("Arial"), theme->title_font_size, QFont::Bold));
-        ui->labelSubTitle->setFont(QFont(tr("Arial"), theme->subtitle_font_size, QFont::Bold));
-    }
-}
+    // 副标题颜色比标题略淡
+    QColor subTitleColor = textColor;
+    subTitleColor.setAlpha(160);
 
+    ui->labelTitle->setStyleSheet(QString("color: %1;").arg(textColor.name()));
+    // 副标题使用 180/255 透明度，确保在复杂背景上也有足够对比度
+    ui->labelSubTitle->setStyleSheet(QString("color: rgba(%1, %2, %3, 180);")
+                                         .arg(textColor.red())
+                                         .arg(textColor.green())
+                                         .arg(textColor.blue()));
 
-void ResultItem::setTheme(QColor& color)
-{
-    Theme* theme = GetThemeSetting()->getSelectTheme();
-    if (theme)
-    {
-        if (!theme->text_color.isEmpty())
-        {
-            ui->labelTitle->setStyleSheet(QString("color:rgb(%1)").arg(theme->text_color));
-            ui->labelSubTitle->setStyleSheet(QString("color:rgb(%1)").arg(theme->text_color));
-        }
-        else
-        {
-            double brightness = GetPngBrightness(color);
-            if (brightness < 100)
-            {
-                ui->labelTitle->setStyleSheet("color: white");
-                ui->labelSubTitle->setStyleSheet("color: white");
-            }
-            else
-            {
-                ui->labelTitle->setStyleSheet("color: black");
-                ui->labelSubTitle->setStyleSheet("color: black");
-            }
-        }
-
-        ui->labelTitle->setFont(QFont(tr("Arial"), theme->title_font_size, QFont::Bold));
-        ui->labelSubTitle->setFont(QFont(tr("Arial"), theme->subtitle_font_size, QFont::Bold));
-    }
+    ui->labelTitle->setFont(GetUiFont(theme->title_font_size, QFont::Bold));
+    ui->labelSubTitle->setFont(GetUiFont(theme->subtitle_font_size, QFont::Normal));
 }

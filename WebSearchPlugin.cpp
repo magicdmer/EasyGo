@@ -19,7 +19,7 @@ WebSearchCfg::WebSearchCfg()
 
 bool WebSearchCfg::load()
 {
-    QFile file("Settings\\WebSearch.json");
+    QFile file("Settings/WebSearch.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return false;
@@ -82,7 +82,7 @@ bool WebSearchCfg::save()
 
     QByteArray byte_array = document.toJson(QJsonDocument::Indented);
 
-    QFile file("Settings\\WebSearch.json");
+    QFile file("Settings/WebSearch.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return false;

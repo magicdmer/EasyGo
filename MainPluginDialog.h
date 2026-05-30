@@ -11,6 +11,7 @@
 #include <QTimer>
 #include "MyLineEdit.h"
 #include <QProgressBar>
+#include "LineProgressBar.h"
 #include "qxtglobalshortcut.h"
 #include "IconExtractor.h"
 #include "ShowContentDlg.h"
@@ -67,12 +68,13 @@ private:
     void resetInputState();
     void createTextEditMenu();
     void copyImageFromTextEdit();
+    void updateIconColors(const QColor& textColor);
 
 private:
     QueryTask* m_task;
     MyListWidget* m_listWidget;
     MyLineEdit* m_lineEdit;
-    QProgressBar* m_progressbar;
+    LineProgressBar* m_progressbar;
     QTextEdit* m_textEdit;
     int m_width;
     QTimer* m_typingTimer;

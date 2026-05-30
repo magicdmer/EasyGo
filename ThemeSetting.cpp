@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include "LogFile.h"
+#include "HelperFunc.h"
 
 ThemeSetting::ThemeSetting()
 {
@@ -26,7 +27,7 @@ bool ThemeSetting::load()
         m_themes.clear();
     }
 
-    QFile file("Settings\\ThemeSetting.json");
+    QFile file("Settings/ThemeSetting.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return false;
@@ -85,7 +86,9 @@ bool ThemeSetting::load()
         }
         else
         {
-            theme.image_path = oTheme["ImagePath"].toString();
+            // 配置里历史上写的是 Windows 反斜杠路径（如 images\\xxx.png），
+            // 归一化为 '/'，否则 Linux 下加载不到。
+            theme.image_path = NormalizePath(oTheme["ImagePath"].toString());
         }
 
         theme.name = oTheme["Name"].toString();
@@ -155,6 +158,7 @@ bool ThemeSetting::save()
         QJsonObject obj;
         obj["Name"] = m_themes[i].name;
         obj["Description"] = m_themes[i].description;
+        obj["Type"] = m_themes[i].type;
         obj["WinOpacity"] = m_themes[i].win_opacity;
         obj["WinColor"] = m_themes[i].win_color;
         obj["ChildWinColor"] = m_themes[i].child_win_color;
@@ -163,6 +167,14 @@ bool ThemeSetting::save()
         obj["ItemSelectedBgColor"] = m_themes[i].item_selected_color;
         obj["TitleFontSize"] = m_themes[i].title_font_size;
         obj["SubTitleFontSize"] = m_themes[i].subtitle_font_size;
+        if (m_themes[i].type == 1)
+        {
+            obj["ImagePath"] = m_themes[i].image_path;
+        }
+        if (m_themes[i].noframe)
+        {
+            obj["NoFrame"] = m_themes[i].noframe;
+        }
         themeArray.append(obj);
     }
 
@@ -172,7 +184,7 @@ bool ThemeSetting::save()
 
     QByteArray byte_array = document.toJson(QJsonDocument::Indented);
 
-    QFile file("Settings\\ThemeSetting.json");
+    QFile file("Settings/ThemeSetting.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return false;
@@ -203,6 +215,120 @@ Theme* ThemeSetting::getSelectTheme()
     }
 
     return theme;
+}
+
+QColor ThemeSetting::resolvedChildWinColor(QColor mainColorForImage)
+{
+    Theme* theme = getSelectTheme();
+    if (!theme) return QColor(240, 240, 240);
+
+    if (!theme->child_win_color.isEmpty())
+        return ToColor(theme->child_win_color);
+
+    if (theme->type == 1 && mainColorForImage.isValid())
+        return mainColorForImage;
+
+    if (!theme->win_color.isEmpty())
+        return ToColor(theme->win_color);
+
+    return QColor(240, 240, 240);
+}
+
+QColor ThemeSetting::resolvedTextColor(QColor mainColorForImage)
+{
+    Theme* theme = getSelectTheme();
+    if (!theme) return QColor(Qt::black);
+
+    if (!theme->text_color.isEmpty())
+        return ToColor(theme->text_color);
+
+    return isDarkTheme(mainColorForImage) ? QColor(Qt::white) : QColor(Qt::black);
+}
+
+QColor ThemeSetting::resolvedScrollbarColor(QColor mainColorForImage)
+{
+    Theme* theme = getSelectTheme();
+    if (!theme) return QColor(220, 220, 220);
+
+    if (!theme->scrollbar_color.isEmpty())
+        return ToColor(theme->scrollbar_color);
+
+    return resolvedChildWinColor(mainColorForImage).darker(125);
+}
+
+QColor ThemeSetting::resolvedItemSelectedColor(QColor mainColorForImage)
+{
+    Theme* theme = getSelectTheme();
+    if (!theme) return QColor(190, 190, 190);
+
+    if (!theme->item_selected_color.isEmpty())
+        return ToColor(theme->item_selected_color);
+
+    return resolvedChildWinColor(mainColorForImage).darker(120);
+}
+
+bool ThemeSetting::isDarkTheme(QColor mainColorForImage)
+{
+    QColor bgColor = resolvedChildWinColor(mainColorForImage);
+    double brightness = GetPngBrightness(bgColor);
+    return brightness < 100;
+}
+
+QString ThemeSetting::scrollbarStyleSheet(const QColor& handleColor, const QColor& bgColor, int width)
+{
+    QColor trackColor = bgColor;
+    trackColor.setAlpha(0);
+
+    return QString(
+        "QScrollBar:vertical {"
+        "    border: none;"
+        "    background: transparent;"
+        "    width: %1px;"
+        "    margin: 2px 0px 2px 0px;"
+        "    border-radius: %2px;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "    background: %3;"
+        "    min-height: 20px;"
+        "    border-radius: %2px;"
+        "}"
+        "QScrollBar::handle:vertical:hover {"
+        "    background: %4;"
+        "}"
+        "QScrollBar::add-line:vertical {"
+        "    height: 0px;"
+        "}"
+        "QScrollBar::sub-line:vertical {"
+        "    height: 0px;"
+        "}"
+        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+        "    background: transparent;"
+        "}"
+        "QScrollBar:horizontal {"
+        "    border: none;"
+        "    background: transparent;"
+        "    height: %1px;"
+        "    margin: 0px 2px 0px 2px;"
+        "    border-radius: %2px;"
+        "}"
+        "QScrollBar::handle:horizontal {"
+        "    background: %3;"
+        "    min-width: 20px;"
+        "    border-radius: %2px;"
+        "}"
+        "QScrollBar::handle:horizontal:hover {"
+        "    background: %4;"
+        "}"
+        "QScrollBar::add-line:horizontal {"
+        "    width: 0px;"
+        "}"
+        "QScrollBar::sub-line:horizontal {"
+        "    width: 0px;"
+        "}"
+        "QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {"
+        "    background: transparent;"
+        "}"
+    ).arg(width).arg(width / 2).arg(handleColor.name()).arg(handleColor.lighter(120).name());
 }
 
 ThemeSetting* GetThemeSetting()

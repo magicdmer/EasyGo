@@ -40,7 +40,7 @@
    </property>
    <property name="font">
     <font>
-     <family>微软雅黑</family>
+     
      <pointsize>12</pointsize>
      <weight>75</weight>
      <bold>true</bold>
@@ -70,10 +70,10 @@
    </property>
    <property name="font">
     <font>
-     <family>微软雅黑</family>
+     
      <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
+     <weight>50</weight>
+     <bold>false</bold>
     </font>
    </property>
    <property name="contextMenuPolicy">

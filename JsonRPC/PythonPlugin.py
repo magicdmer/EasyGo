@@ -94,3 +94,32 @@ class PythonPluginAPI(object):
         """
         param = json.dumps({"Title":title,"FilePath":filePath})
         print(json.dumps({"FuncName": "Ra_EditFile","Parameter":param}))
+    
+    @classmethod
+    def PlayMusic(cls, musicPath):
+        """
+        let EasyGo play/pause musicPath, local file or url
+        """
+        print(json.dumps({"FuncName": "Ra_PlayMusic","Parameter":musicPath}))
+        
+    @classmethod
+    def PauseMusic(cls):
+        """
+        let EasyGo pause music
+        """
+        print(json.dumps({"FuncName": "Ra_PauseMusic","Parameter":""}))
+        
+    @classmethod
+    def StopMusic(cls):
+        """
+        let EasyGo stop music
+        """
+        print(json.dumps({"FuncName": "Ra_StopMusic","Parameter":""}))
+        
+    @classmethod
+    def ToImageCode(cls, picPath):
+        """
+        convert imagepath to imagecode, local file or url
+        """
+        return "[pic=" + picPath + "]"
+        

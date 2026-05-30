@@ -128,7 +128,7 @@ bool EpmPlugin::query(Query query,QVector<Result>& vecResult)
     else if (strQuery == "install")
     {
         QString jsonData;
-        QString repoUrl = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGo/main/repo.json";
+        QString repoUrl = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGoPlugin/main/repo.json";
         if (!GetSettings()->m_repo_url.isEmpty())
         {
             repoUrl = QString("%1/repo.json").arg(GetSettings()->m_repo_url);
@@ -156,7 +156,7 @@ bool EpmPlugin::query(Query query,QVector<Result>& vecResult)
                 parsePluginList(jsonData);
             }
 
-            QString host_url = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGo/main/plugin";
+            QString host_url = "https://ghfast.top/https://raw.githubusercontent.com/magicdmer/EasyGoPlugin/main/plugin";
             if (!GetSettings()->m_repo_url.isEmpty())
             {
                 host_url = QString("%1/plugin").arg(GetSettings()->m_repo_url);

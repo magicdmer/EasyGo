@@ -230,6 +230,19 @@
         </font>
        </property>
       </widget>
+      <widget class="QLabel" name="labelShortcutHint">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>323</y>
+         <width>400</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>uos 下请在控制中心的快捷键设置中手动设置启动快捷键。</string>
+       </property>
+      </widget>
       <widget class="QCheckBox" name="chkBoxCheckUpdate">
        <property name="geometry">
         <rect>

@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QVector>
 
-#define EASYGO_VERSION "1.9.8.4"
+#define EASYGO_VERSION "2.0.0"
 
 struct PluginConfig{
     QString id;

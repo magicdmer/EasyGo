@@ -42,12 +42,16 @@ else:win32:CONFIG(debug, debug|release): {
     LIBS += -lAdvapi32 -lshell32 -lole32 -luser32
 }
 
-include(QxtGobalShortcut/qxtglobalshortcut.pri)
+win32 {
+    SOURCES += FastSearch.cpp
+    HEADERS += FastSearch.h
+}
+
+include(QxtGlobalShortcut/qxtglobalshortcut.pri)
 include(QtNotify2/qtnotify2.pri)
 
 SOURCES += main.cpp\
     EpmPlugin.cpp \
-    FastSearch.cpp \
     HotKeyEdit.cpp \
     IconExtractor.cpp \
     IndexTask.cpp \
@@ -78,12 +82,13 @@ SOURCES += main.cpp\
     ProgramPlugin.cpp \
     WebSearchPlugin.cpp \
     WebSearchSetDlg.cpp \
-    AboutDialog.cpp
+    AboutDialog.cpp \
+    LineProgressBar.cpp \
+    singleapplication.cpp
 
 HEADERS  += MainDialog.h \
     CommonTypes.h \
     EpmPlugin.h \
-    FastSearch.h \
     HotKeyEdit.h \
     IconExtractor.h \
     IndexTask.h \
@@ -113,7 +118,9 @@ HEADERS  += MainDialog.h \
     ProgramPlugin.h \
     WebSearchPlugin.h \
     WebSearchSetDlg.h \
-    AboutDialog.h
+    AboutDialog.h \
+    LineProgressBar.h \
+    singleapplication.h
 
 FORMS    += MainDialog.ui \
     InstallDlg.ui \
@@ -126,3 +133,8 @@ FORMS    += MainDialog.ui \
 
 RESOURCES += \
     EasyGo.qrc
+
+contains(CONFIG, sponsor) {
+    DEFINES += ENABLE_SPONSOR
+    RESOURCES += sponsor.qrc
+}

@@ -6,191 +6,230 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
+    <width>420</width>
     <height>360</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>关于 - 1.9.8</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
+  <property name="minimumSize">
+   <size>
+    <width>420</width>
+    <height>360</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>420</width>
+    <height>360</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>关于</string>
+  </property>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>420</width>
+     <height>360</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
     <number>0</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
-   <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
+   <widget class="QWidget" name="tabInfo">
+    <attribute name="title">
+     <string>说明</string>
+    </attribute>
+    <widget class="QLabel" name="labelTitle">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>20</y>
+       <width>341</width>
+       <height>36</height>
+      </rect>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string>说明</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QPlainTextEdit" name="plainTextEdit">
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="plainText">
-          <string>本软件为开源软件，部分插件也开源，欢迎使用！
-
-交流群：707119847
-
-交流站点：
-https://github.com/magicdmer/EasyGo
-https://meta.appinn.net/t/topic/35148
-</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_2">
-      <attribute name="title">
-       <string> 赞助</string>
-      </attribute>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>190</width>
-         <height>190</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="EasyGo.qrc">:/Images/weixin.png</pixmap>
-       </property>
-       <property name="scaledContents">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>-40</y>
-         <width>301</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>版本：1.9.2</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>280</x>
-         <y>250</y>
-         <width>71</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>支付宝</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_4">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>250</y>
-         <width>71</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>微信</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_3">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>50</y>
-         <width>190</width>
-         <height>190</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="EasyGo.qrc">:/Images/zhifubao.jpg</pixmap>
-       </property>
-       <property name="scaledContents">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </widget>
+     <property name="font">
+      <font>
+       <pointsize>18</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>EasyGo</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
-   </item>
-  </layout>
+    <widget class="QLabel" name="labelVersion">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>60</y>
+       <width>341</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>版本：</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelDesc">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>100</y>
+       <width>321</width>
+       <height>64</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>一个轻量、便携的桌面快速启动和插件工具。
+支持本地搜索、命令执行、网页搜索、Python 插件扩展和全局快捷键。</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelHomepage">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>172</y>
+       <width>341</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>&lt;a href=&quot;https://github.com/magicdmer/EasyGo&quot;&gt;GitHub: https://github.com/magicdmer/EasyGo&lt;/a&gt;</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelIssue">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>220</y>
+       <width>341</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>欢迎通过 GitHub Issue 提交问题和建议。</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tabSponsor">
+    <attribute name="title">
+     <string>赞助</string>
+    </attribute>
+    <widget class="QLabel" name="labelWeixinQr">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>52</y>
+       <width>190</width>
+       <height>190</height>
+      </rect>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="sponsor.qrc">:/Images/weixin.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelAlipayQr">
+     <property name="geometry">
+      <rect>
+       <x>222</x>
+       <y>52</y>
+       <width>190</width>
+       <height>190</height>
+      </rect>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="sponsor.qrc">:/Images/zhifubao.jpg</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelWeixin">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>254</y>
+       <width>190</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>微信</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelAlipay">
+     <property name="geometry">
+      <rect>
+       <x>222</x>
+       <y>254</y>
+       <width>190</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>支付宝</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+  </widget>
  </widget>
  <resources>
-  <include location="EasyGo.qrc"/>
+  <include location="sponsor.qrc"/>
  </resources>
  <connections/>
 </ui>

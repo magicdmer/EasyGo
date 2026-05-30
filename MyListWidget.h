@@ -13,8 +13,7 @@ protected:
     void mousePressEvent(QMouseEvent *me);
 public:
     int number();
-    void setTheme();
-    void setTheme(QColor& color);
+    void setTheme(QColor mainColorForImage = QColor());
     ResultItem* getCurrentItem();
     ResultItem* getItem(int index);
     void addItemWidget(ResultItem* item,bool hide = false);
