@@ -49,12 +49,12 @@ jobs:
           xcopy Settings deploy\EasyGo\Settings\ /E /I /Y
           copy release\EasyGo.exe deploy\EasyGo\
           cd deploy
-          7z a -r ..\EasyGo-%VERSION%-Windows.zip EasyGo
+          7z a -r ..\EasyGo_%VERSION%_win32.zip EasyGo
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: EasyGo-Windows
-          path: EasyGo-*-Windows.zip
+          path: EasyGo_*_win32.zip
 
   build-linux:
     runs-on: ubuntu-latest
@@ -144,12 +144,12 @@ jobs:
         env:
           VERSION: ${{ steps.get_version.outputs.VERSION }}
         run: |
-          dpkg-deb --build deb_root EasyGo-${VERSION}-amd64.deb
+          dpkg-deb --build deb_root EasyGo_${VERSION}_amd64.deb
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: EasyGo-Linux
-          path: EasyGo-*.deb
+          path: EasyGo_*.deb
 
   create-release:
     needs: [build-windows, build-linux]
@@ -162,8 +162,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            EasyGo-Windows/EasyGo-*-Windows.zip
-            EasyGo-Linux/EasyGo-*.deb
+            EasyGo-Windows/EasyGo_*_win32.zip
+            EasyGo-Linux/EasyGo_*.deb
           draft: false
           prerelease: false
         env:
