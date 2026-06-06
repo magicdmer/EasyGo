@@ -28,5 +28,6 @@
             "ScrollBarColor": "220,220,220"
         }
     ],
-    "CurrentSelect": ""
+    "CurrentSelect": "",
+    "RoundCorner": 1
 }
