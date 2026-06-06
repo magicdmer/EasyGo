@@ -25,6 +25,7 @@
 #include "qxtglobalshortcut_p.h"
 #include <QX11Info>
 #include <X11/Xlib.h>
+#include <xcb/xcb.h>
 
 static int (*original_x_errhandler)(Display* display, XErrorEvent* event);
 
@@ -51,13 +52,28 @@ static int qxt_x_errhandler(Display* display, XErrorEvent *event)
 
 bool QxtGlobalShortcutPrivate::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
 {
-    XEvent* event = static_cast<XEvent*>(message);
-    if (event->type == KeyPress)
+    Q_UNUSED(result);
+    if (eventType == "xcb_generic_event_t")
     {
-        XKeyEvent* key = (XKeyEvent*) event;
-        activateShortcut(key->keycode, 
-            // Mod1Mask == Alt, Mod4Mask == Meta
-            key->state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask));
+        xcb_generic_event_t* event = static_cast<xcb_generic_event_t*>(message);
+        if ((event->response_type & ~0x80) == XCB_KEY_PRESS)
+        {
+            xcb_key_press_event_t* key = reinterpret_cast<xcb_key_press_event_t*>(event);
+            activateShortcut(key->detail, 
+                // XCB_MOD_MASK_1 == Alt, XCB_MOD_MASK_4 == Meta
+                key->state & (XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_CONTROL | XCB_MOD_MASK_1 | XCB_MOD_MASK_4));
+        }
+    }
+    else // fallback for "x11generic" or other X11 types
+    {
+        XEvent* event = static_cast<XEvent*>(message);
+        if (event->type == KeyPress)
+        {
+            XKeyEvent* key = (XKeyEvent*) event;
+            activateShortcut(key->keycode, 
+                // Mod1Mask == Alt, Mod4Mask == Meta
+                key->state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask));
+        }
     }
     return false;
 }
