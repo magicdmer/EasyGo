@@ -28,7 +28,7 @@ win32:CONFIG(release, debug|release): {
         LIBS += -LQuaZIP/x86/lib -lQt5Quazip1
     }
 
-    LIBS += -lAdvapi32 -lshell32 -lole32 -luser32
+    LIBS += -lAdvapi32 -lshell32 -lole32 -luser32 -lgdi32
 }
 else:win32:CONFIG(debug, debug|release): {
 
@@ -39,7 +39,7 @@ else:win32:CONFIG(debug, debug|release): {
         INCLUDEPATH += QuaZIP/x86/include
         LIBS += -LQuaZIP/x86/lib -lQt5Quazip1
     }
-    LIBS += -lAdvapi32 -lshell32 -lole32 -luser32
+    LIBS += -lAdvapi32 -lshell32 -lole32 -luser32 -lgdi32
 }
 
 win32 {
