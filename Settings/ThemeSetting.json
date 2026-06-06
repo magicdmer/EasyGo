@@ -1,0 +1,32 @@
+{
+    "Themes": [
+        {
+            "Description": "透明白",
+            "Name": "BurWhite",
+            "WinOpacity": 0.8,
+            "ItemSelectedBgColor": "190,190,190",
+            "WinColor": "255,255,255",
+            "TextColor": "0,0,0",
+            "ScrollBarColor": "220,220,220"
+        },
+        {
+            "Description": "透明黑",
+            "Name": "BurBlack",
+            "WinOpacity": 0.8,
+            "ItemSelectedBgColor": "128,128,128",
+            "WinColor": "105,105,105",
+            "TextColor": "255,255,255",
+            "ScrollBarColor": "220,220,220"
+        },
+        {
+            "Description": "纯黑",
+            "Name": "Black",
+            "WinOpacity": 1,
+            "ItemSelectedBgColor": "128,128,128",
+            "WinColor": "105,105,105",
+            "TextColor": "230,230,230",
+            "ScrollBarColor": "220,220,220"
+        }
+    ],
+    "CurrentSelect": ""
+}

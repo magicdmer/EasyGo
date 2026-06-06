@@ -1,0 +1,170 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+      - name: Install Qt5
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.15.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win32_msvc2019'
+          cache: true
+      - name: Build EasyGo
+        run: |
+          qmake EasyGo.pro -spec win32-msvc
+          nmake release
+      - name: Extract version from tag
+        id: get_version
+        shell: bash
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - name: Package for Windows
+        shell: cmd
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          mkdir deploy
+          7z x PackEnv\EasyGo.zip -odeploy\EasyGo
+          xcopy Images deploy\EasyGo\Images\ /E /I /Y
+          xcopy JsonRPC deploy\EasyGo\JsonRPC\ /E /I /Y
+          xcopy Docs deploy\EasyGo\Docs\ /E /I /Y
+          xcopy Settings deploy\EasyGo\Settings\ /E /I /Y
+          copy release\EasyGo.exe deploy\EasyGo\
+          cd deploy
+          7z a -r ..\EasyGo-%VERSION%-Windows.7z EasyGo\*
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyGo-Windows
+          path: EasyGo-*-Windows.7z
+
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          printf 'deb http://archive.debian.org/debian buster main\n' > /etc/apt/sources.list
+          printf 'deb http://archive.debian.org/debian-security buster/updates main\n' >> /etc/apt/sources.list
+          echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+          apt-get update
+          apt-get install -y qtbase5-dev qtmultimedia5-dev libqt5x11extras5-dev build-essential libgl1-mesa-dev libxkbcommon-x11-0 libxkbcommon0 libdbus-1-3 wget ca-certificates git dpkg dpkg-dev
+      - name: Build EasyGo
+        run: |
+          export QT_SELECT=5
+          qmake EasyGo.pro
+          make -j$(nproc)
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - name: Create DEB package structure
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          mkdir -p deb_root/DEBIAN
+          mkdir -p deb_root/opt/EasyGo
+          mkdir -p deb_root/usr/bin
+          mkdir -p deb_root/usr/share/applications
+          mkdir -p deb_root/usr/share/icons/hicolor/64x64/apps
+          
+          # Copy binary and resources
+          cp EasyGo deb_root/opt/EasyGo/
+          cp -r Images JsonRPC Docs Settings deb_root/opt/EasyGo/
+          chmod 755 deb_root/opt/EasyGo/EasyGo
+          
+          # Copy application icon
+          cp Images/easygo.png deb_root/usr/share/icons/hicolor/64x64/apps/easygo.png
+          chmod 644 deb_root/usr/share/icons/hicolor/64x64/apps/easygo.png
+          
+          # Create symlink in /usr/bin
+          ln -s /opt/EasyGo/EasyGo deb_root/usr/bin/easygo
+          
+          # Create .desktop file
+          cat > deb_root/usr/share/applications/easygo.desktop << 'EOFILE'
+          [Desktop Entry]
+          Name=EasyGo
+          Comment=A powerful quick launch tool
+          Exec=easygo
+          Icon=easygo
+          Type=Application
+          Categories=Utility;
+          Terminal=false
+          StartupNotify=true
+          EOFILE
+          chmod 644 deb_root/usr/share/applications/easygo.desktop
+          
+          # Create control file
+          cat > deb_root/DEBIAN/control << EOFILE
+          Package: easygo
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Homepage: https://github.com/magicdmer/EasyGo
+          Depends: libc6 (>= 2.28), libgl1, libqt5core5a (>= 5.11.3), libqt5gui5 (>= 5.11.3), libqt5network5 (>= 5.11.3), libqt5widgets5 (>= 5.11.3), libqt5sql5 (>= 5.11.3), libqt5multimedia5 (>= 5.11.3), libstdc++6, libx11-6
+          Maintainer: magicdmer <magicdmer@gmail.com>
+          Installed-Size: 5120
+          Description: EasyGo 快捷启动软件
+           这是一款快捷启动软件，基本功能是快速查找所要打开的软件，并对其进行打开等操作。
+           增强功能为软件所支持的各种插件（支持 python/c++/易语言），比如书签搜索，有道翻译，天气查询等。
+          EOFILE
+          chmod 644 deb_root/DEBIAN/control
+
+          # Create postinst script for 777 permissions
+          cat > deb_root/DEBIAN/postinst << 'EOFILE'
+          #!/bin/sh
+          chmod -R 777 /opt/EasyGo
+          EOFILE
+          chmod 755 deb_root/DEBIAN/postinst
+
+      - name: Build DEB package
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          dpkg-deb --build deb_root EasyGo-${VERSION}-amd64.deb
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyGo-Linux
+          path: EasyGo-*.deb
+
+  create-release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            EasyGo-Windows/EasyGo-*-Windows.7z
+            EasyGo-Linux/EasyGo-*.deb
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

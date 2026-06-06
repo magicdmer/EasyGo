@@ -29,6 +29,8 @@ ui_*.h
 *.jsc
 Makefile*
 *build-*
+!.github/workflows/*
+!QuaZIP/**/*.dll
 *.qm
 *.prl
 
