@@ -33,7 +33,7 @@
 #include <QUrl>
 #endif
 
-namespace {
+#define USER_AGENT "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36"
 
 QString readOsReleaseValue(const QString& key)
 {
@@ -61,10 +61,6 @@ QString readOsReleaseValue(const QString& key)
 
     return QString();
 }
-
-} // namespace
-
-#define USER_AGENT "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36"
 
 QString GetUiFontFamily()
 {

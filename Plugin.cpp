@@ -211,6 +211,24 @@ bool Plugin::load()
         m_info.interpreterArgv = jsonObject["InterpreterArgv"].toString();
     }
 
+    m_info.platforms.clear();
+    if (jsonObject.contains("Platforms") && jsonObject["Platforms"].isArray())
+    {
+        QJsonArray platformArray = jsonObject["Platforms"].toArray();
+        for (int i = 0; i < platformArray.size(); ++i)
+        {
+            QString platform = platformArray[i].toString().trimmed().toLower();
+            if (!platform.isEmpty() && !m_info.platforms.contains(platform))
+            {
+                m_info.platforms.append(platform);
+            }
+        }
+    }
+    if (m_info.platforms.isEmpty())
+    {
+        m_info.platforms.append("win32");
+    }
+
     return true;
 }
 

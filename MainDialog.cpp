@@ -18,6 +18,7 @@
 #include <QUrl>
 #include <QTime>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QProgressDialog>
 #include <QDir>
@@ -1449,17 +1450,44 @@ void MainDialog::installPlugin(QString& filePath)
             QString("/%1").arg(pluginName);
     QString keyword = jsonObject["Keyword"].toString();
     QString pluginVersion = jsonObject["Version"].toString();
+    QStringList platforms;
+    if (jsonObject.contains("Platforms") && jsonObject["Platforms"].isArray())
+    {
+        QJsonArray platformArray = jsonObject["Platforms"].toArray();
+        for (int i = 0; i < platformArray.size(); ++i)
+        {
+            QString platform = platformArray[i].toString().trimmed().toLower();
+            if (!platform.isEmpty() && !platforms.contains(platform))
+            {
+                platforms.append(platform);
+            }
+        }
+    }
+    if (platforms.isEmpty())
+    {
+        platforms.append("win32");
+    }
 
+#ifdef Q_OS_WIN32
+    if (!platforms.contains("win32", Qt::CaseInsensitive))
+#else
+    if (!platforms.contains("linux", Qt::CaseInsensitive))
+#endif
+    {
+        QMessageBox::information(this, tr("提示"), tr("该插件不支持当前系统"));
+        return;
+    }
+
+#ifdef Q_OS_WIN32
     if (pluginType == "python")
     {
-#ifdef Q_OS_WIN32
         if (GetSettings()->m_pythonPath.isEmpty())
         {
-            QMessageBox::information(this,tr("提示"),tr("该插件需要依赖python环境，请设置后安装"));
+            QMessageBox::information(this, tr("提示"), tr("该插件需要依赖python环境，请设置后安装"));
             return;
         }
-#endif
     }
+#endif
 
     InstallDlg dlg(this);
     QDir dir;

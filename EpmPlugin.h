@@ -12,6 +12,7 @@ struct EpmPluginInfo{
     QString version;
     QString min_require;
     int timestamp;
+    QStringList platforms;
 };
 
 class EpmPlugin : public Plugin

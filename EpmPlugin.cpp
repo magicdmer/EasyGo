@@ -23,6 +23,8 @@ EpmPlugin::EpmPlugin() : Plugin()
     m_info.keyword.append("epm");
     m_info.pluginType = "c++";
     m_info.author = "magicdmer";
+    m_info.enableSeparate = 0;
+    m_info.platforms << "win32" << "linux";
     m_iconPath = QDir::currentPath() + QString("/Images/plugin.png");
     m_guid = m_info.id;
     m_mode = RealMode;
@@ -366,6 +368,32 @@ bool EpmPlugin::parsePluginList(QString& strJson)
     {
         EpmPluginInfo info;
         QJsonObject obj = keysObj[i].toObject();
+        if (obj.contains("platforms") && obj["platforms"].isArray())
+        {
+            QJsonArray platformArray = obj["platforms"].toArray();
+            for (int j = 0; j < platformArray.size(); ++j)
+            {
+                QString platform = platformArray[j].toString().trimmed().toLower();
+                if (!platform.isEmpty() && !info.platforms.contains(platform))
+                {
+                    info.platforms.append(platform);
+                }
+            }
+        }
+        if (info.platforms.isEmpty())
+        {
+            info.platforms.append("win32");
+        }
+
+#ifdef Q_OS_WIN32
+        if (!info.platforms.contains("win32", Qt::CaseInsensitive))
+#else
+        if (!info.platforms.contains("linux", Qt::CaseInsensitive))
+#endif
+        {
+            continue;
+        }
+
         info.id = obj["id"].toString();
         info.name = obj["name"].toString();
         info.description = obj["description"].toString();
@@ -411,6 +439,17 @@ void EpmPlugin::installPlugin(QString parameter, QObject* parent)
         {
             QMessageBox::information(dlg, tr("提示"),
                         tr("插件依赖 EasyGo %1 以上的版本\n请更新后再安装").arg(info->min_require));
+            return;
+        }
+
+#ifdef Q_OS_WIN32
+        if (!info->platforms.contains("win32", Qt::CaseInsensitive))
+#else
+        if (!info->platforms.contains("linux", Qt::CaseInsensitive))
+#endif
+        {
+            QMessageBox::information(dlg, tr("提示"),
+                        tr("该插件不支持当前系统"));
             return;
         }
     }

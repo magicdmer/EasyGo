@@ -14,6 +14,7 @@ ThemePlugin::ThemePlugin()
     m_info.pluginType = "c++";
     m_info.author = "magicdmer";
     m_info.enableSeparate = 0;
+    m_info.platforms << "win32" << "linux";
     m_iconPath = QDir::currentPath() + QString("/Images/color.png");
     m_guid = m_info.id;
     m_mode = RealMode;

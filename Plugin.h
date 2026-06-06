@@ -101,6 +101,7 @@ struct PluginInfo{
     QString interpreterArgv;
     QString exeName;
     QString cfgPath;
+    QStringList platforms;
 
     PluginInfo() {
         argc = 0;
