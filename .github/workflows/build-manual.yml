@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: EasyGo-Windows
-          path: deploy/EasyGo
+          path: deploy
 
   build-linux:
     if: ${{ inputs.build_linux }}

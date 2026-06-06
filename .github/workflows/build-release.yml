@@ -49,7 +49,7 @@ jobs:
           xcopy Settings deploy\EasyGo\Settings\ /E /I /Y
           copy release\EasyGo.exe deploy\EasyGo\
           cd deploy
-          7z a -r ..\EasyGo-%VERSION%-Windows.zip EasyGo\*
+          7z a -r ..\EasyGo-%VERSION%-Windows.zip EasyGo
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
