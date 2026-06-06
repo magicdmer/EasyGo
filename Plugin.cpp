@@ -716,11 +716,7 @@ void Plugin::Ra_StopMusic(QString parameter,QObject* parent)
 bool CPlusPlugin::initPlugin(QString pluginPath)
 {
     QString exePath = NormalizePath(m_path + QString("/%1").arg(m_info.exeName));
-
-    int index = exePath.lastIndexOf(".");
-    QString libraryName = exePath.mid(0,index);
-
-    m_library.setFileName(libraryName);
+    m_library.setFileName(exePath);
     if (!m_library.load())
     {
         return false;
@@ -1297,11 +1293,7 @@ QString PythonPlugin::execute(QString funcName,QString parameter)
 bool EPlugin::initPlugin(QString pluginPath)
 {
     QString exePath = NormalizePath(m_path + QString("/%1").arg(m_info.exeName));
-
-    int index = exePath.lastIndexOf(".");
-    QString libraryName = exePath.mid(0,index);
-
-    m_library.setFileName(libraryName);
+    m_library.setFileName(exePath);
     if (!m_library.load())
     {
         return false;
