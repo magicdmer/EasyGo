@@ -1,5 +1,9 @@
 ﻿#include "ChineseLetterHelper.h"
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+# pragma execution_character_set("utf-8")
+#endif
+
 bool ChineseLetterHelper::In(wchar_t start, wchar_t end, wchar_t code)
 {
     if (code >= start && code <= end)

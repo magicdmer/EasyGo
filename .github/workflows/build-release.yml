@@ -42,19 +42,19 @@ jobs:
           VERSION: ${{ steps.get_version.outputs.VERSION }}
         run: |
           mkdir deploy
-          7z x PackEnv\EasyGo.zip -odeploy\EasyGo
+          7z x PackEnv\EasyGo.zip -odeploy
           xcopy Images deploy\EasyGo\Images\ /E /I /Y
           xcopy JsonRPC deploy\EasyGo\JsonRPC\ /E /I /Y
           xcopy Docs deploy\EasyGo\Docs\ /E /I /Y
           xcopy Settings deploy\EasyGo\Settings\ /E /I /Y
           copy release\EasyGo.exe deploy\EasyGo\
           cd deploy
-          7z a -r ..\EasyGo-%VERSION%-Windows.7z EasyGo\*
+          7z a -r ..\EasyGo-%VERSION%-Windows.zip EasyGo\*
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: EasyGo-Windows
-          path: EasyGo-*-Windows.7z
+          path: EasyGo-*-Windows.zip
 
   build-linux:
     runs-on: ubuntu-latest
@@ -162,7 +162,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            EasyGo-Windows/EasyGo-*-Windows.7z
+            EasyGo-Windows/EasyGo-*-Windows.zip
             EasyGo-Linux/EasyGo-*.deb
           draft: false
           prerelease: false
