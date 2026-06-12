@@ -36,18 +36,24 @@ jobs:
           TAG=${GITHUB_REF#refs/tags/}
           VERSION=${TAG#v}
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - name: Deploy dependencies
+        shell: cmd
+        run: |
+          mkdir deploy
+          7z x PackEnv\EasyGo.zip -odeploy
+          copy release\EasyGo.exe deploy\EasyGo\
+          for %%I in (windeployqt.exe) do set "QT_BIN=%%~dp$PATH:I"
+          copy deploy\EasyGo\Qt5Quazip1.dll "%QT_BIN%"
+          windeployqt.exe --release --compiler-runtime --plugindir deploy\EasyGo\Depends deploy\EasyGo\EasyGo.exe
+          xcopy Images deploy\EasyGo\Images\ /E /I /Y
+          xcopy JsonRPC deploy\EasyGo\JsonRPC\ /E /I /Y
+          xcopy Docs deploy\EasyGo\Docs\ /E /I /Y
+          xcopy Settings deploy\EasyGo\Settings\ /E /I /Y
       - name: Package for Windows
         shell: cmd
         env:
           VERSION: ${{ steps.get_version.outputs.VERSION }}
         run: |
-          mkdir deploy
-          7z x PackEnv\EasyGo.zip -odeploy
-          xcopy Images deploy\EasyGo\Images\ /E /I /Y
-          xcopy JsonRPC deploy\EasyGo\JsonRPC\ /E /I /Y
-          xcopy Docs deploy\EasyGo\Docs\ /E /I /Y
-          xcopy Settings deploy\EasyGo\Settings\ /E /I /Y
-          copy release\EasyGo.exe deploy\EasyGo\
           cd deploy
           7z a -r ..\EasyGo_%VERSION%_win32.zip EasyGo
       - name: Upload Windows artifact
