@@ -7,7 +7,7 @@ IDI_ICON1 ICON DISCARDABLE "app.ico"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION 2,0,0,0
+    FILEVERSION 2,0,1,0
     FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
     FILEFLAGS VS_FF_DEBUG
@@ -24,8 +24,8 @@ VS_VERSION_INFO VERSIONINFO
             BEGIN
                 VALUE "CompanyName", "Fantasy Studio\0"
                 VALUE "FileDescription", "EasyGo 快捷启动 多线程版本\0"
-                VALUE "ProductVersion", "2.0.0"
-                VALUE "LegalCopyright", "Copyright (c) magicdmer 2026-04-18\0"
+                VALUE "ProductVersion", "2.0.1"
+                VALUE "LegalCopyright", "Copyright (c) magicdmer 2026-07-13\0"
                 VALUE "LegalTrademarks", "\0"
                 VALUE "OriginalFilename", "EasyGo.exe\0"
                 VALUE "ProductName", "EasyGo 快捷启动\0"
