@@ -1,4 +1,5 @@
 ﻿#include "OptionPlugin.h"
+#include <QApplication>
 #include <QDir>
 #include <QMessageBox>
 #include "MainDialog.h"

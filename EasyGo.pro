@@ -48,7 +48,6 @@ win32 {
 }
 
 include(QxtGlobalShortcut/qxtglobalshortcut.pri)
-include(QtNotify2/qtnotify2.pri)
 
 SOURCES += main.cpp\
     EpmPlugin.cpp \

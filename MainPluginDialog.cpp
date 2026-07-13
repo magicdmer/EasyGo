@@ -1,4 +1,5 @@
 ﻿#include "MainPluginDialog.h"
+#include "MainDialog.h"
 #include "ResultItem.h"
 #include <QLibrary>
 #include <QMouseEvent>
@@ -104,11 +105,6 @@ MainPluginDialog::MainPluginDialog(Plugin* plugin, QWidget *parent) :
 
     connect(m_listWidget,SIGNAL(sigMouseRight()),this,SLOT(sltRightOpr()));
     connect(m_listWidget,SIGNAL(sigMouseLeft()),this,SLOT(sltLeftOpr()));
-
-    m_notifyMgr = new NotifyManager(this);
-    m_notifyMgr->setMaxCount(5);
-    m_notifyMgr->setDisplayTime(5000);
-    m_notifyMgr->setNotifyWndSize(300, 100);
 
     for (int i = 0; i < GetSettings()->m_maxResultsToShow; i++)
     {
@@ -597,7 +593,13 @@ void MainPluginDialog::showContent(QString title, QString content)
 
 void MainPluginDialog::showTip(QString title, QString content)
 {
-    m_notifyMgr->notify(title, content);
+    MainDialog *mainDialog = qobject_cast<MainDialog *>(parentWidget());
+    if (!mainDialog)
+    {
+        return;
+    }
+
+    mainDialog->showTip(title, content);
 }
 
 void MainPluginDialog::editFile(QString title, QString filePath)

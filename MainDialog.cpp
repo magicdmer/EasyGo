@@ -168,11 +168,6 @@ MainDialog::MainDialog(QWidget *parent) :
         connect(m_listWidget,SIGNAL(sigMouseLeft()),this,SLOT(sltLeftOpr()));
     }
 
-    m_notifyMgr = new NotifyManager(this);
-    m_notifyMgr->setMaxCount(5);
-    m_notifyMgr->setDisplayTime(5000);
-    m_notifyMgr->setNotifyWndSize(300, 100);
-
     for (int i = 0; i < GetSettings()->m_maxResultsToShow; i++)
     {
         Result result;
@@ -915,7 +910,12 @@ void MainDialog::showContent(QString title, QString content)
 
 void MainDialog::showTip(QString title, QString content)
 {
-    m_notifyMgr->notify(title, content);
+    if (!m_pTrayIcon || !m_pTrayIcon->isVisible())
+    {
+        return;
+    }
+
+    m_pTrayIcon->showMessage(title, content, QIcon(":/Images/app.ico"), 5000);
 }
 
 void MainDialog::editFile(QString title, QString filePath)

@@ -18,7 +18,6 @@
 #include <QColor>
 #include <QPainter>
 #include <QTextEdit>
-#include "notifymanager.h"
 #include <QMediaPlayer>
 #include <QPropertyAnimation>
 #include "CommonTypes.h"
@@ -91,7 +90,6 @@ private:
     QColor m_mainColor;
     int m_curThemeType;
     int m_initHeight;
-    NotifyManager *m_notifyMgr;
     QMediaPlayer m_mediaPlayer;
     ResultItem* m_curClickedItem;
     QPixmap m_playPixmap;
