@@ -24,6 +24,7 @@
 #include <windows.h>
 #endif
 #ifdef Q_OS_LINUX
+#include <QFile>
 #include <QSettings>
 #include <QRegExp>
 #include <QStandardPaths>
@@ -538,6 +539,47 @@ static bool gioSupportsLaunch()
     return cached == 1;
 }
 
+// 部分第三方应用附带的 .sh 文件没有 shebang，直接交给 QProcess/gio 时内核会返回
+// Exec format error。此类脚本显式交给 /bin/sh，兼容桌面环境原有的启动行为。
+static bool needsShellCompatibility(const QString& program)
+{
+    if (QFileInfo(program).suffix().compare("sh", Qt::CaseInsensitive) != 0)
+    {
+        return false;
+    }
+
+    QFile file(program);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return false;
+    }
+
+    return file.read(2) != "#!";
+}
+
+static bool startLinuxProgram(const QString& program, const QStringList& arguments,
+                              const QString& workDir = QString())
+{
+    QProcess process;
+    if (!workDir.isEmpty())
+    {
+        process.setWorkingDirectory(workDir);
+    }
+
+    if (needsShellCompatibility(program))
+    {
+        process.setProgram("/bin/sh");
+        process.setArguments(QStringList() << program << arguments);
+    }
+    else
+    {
+        process.setProgram(program);
+        process.setArguments(arguments);
+    }
+
+    return process.startDetached();
+}
+
 // gio 缺失时的兜底：自行解析 .desktop 的 Exec（去掉 field codes），保留必要参数启动。
 // 注意此路径不处理 Terminal=true / DBusActivatable，仅作 gio 不可用时的退路。
 static bool launchDesktopFileFallback(const QString& desktopPath)
@@ -555,15 +597,31 @@ static bool launchDesktopFileFallback(const QString& desktopPath)
     QStringList parts = exec.split(' ', QString::SkipEmptyParts);
     const QString program = parts.takeFirst();                 // 其余为必要参数，保留
 
-    QProcess process;
     const QString workDir = df.value("/Desktop Entry/Path").toString();
-    if (!workDir.isEmpty())
+    return startLinuxProgram(program, parts, workDir);
+}
+
+static bool desktopFileNeedsShellCompatibility(const QString& desktopPath)
+{
+    QSettings df(desktopPath, QSettings::IniFormat);
+    df.setIniCodec("UTF8");
+
+    QString exec = df.value("/Desktop Entry/Exec").toString();
+    exec = exec.replace(QRegExp("%[a-zA-Z]"), "").trimmed();
+    if (exec.isEmpty())
     {
-        process.setWorkingDirectory(workDir);
+        return false;
     }
-    process.setProgram(program);
-    process.setArguments(parts);
-    return process.startDetached();
+
+    QString program = exec.split(' ', QString::SkipEmptyParts).first();
+    if (program.size() >= 2 &&
+        ((program.startsWith('"') && program.endsWith('"')) ||
+         (program.startsWith('\'') && program.endsWith('\''))))
+    {
+        program = program.mid(1, program.size() - 2);
+    }
+
+    return needsShellCompatibility(program);
 }
 
 void Plugin::Ra_Open(QString data,QObject* parent)
@@ -574,6 +632,12 @@ void Plugin::Ra_Open(QString data,QObject* parent)
     // 自动处理 Exec 参数、字段码、Terminal=true、DBusActivatable、工作目录等。
     if (data.endsWith(".desktop") && QFileInfo::exists(data))
     {
+        if (desktopFileNeedsShellCompatibility(data))
+        {
+            launchDesktopFileFallback(data);
+            return;
+        }
+
         if (gioSupportsLaunch() && QProcess::startDetached("gio", QStringList() << "launch" << data))
         {
             return;
@@ -599,13 +663,12 @@ void Plugin::Ra_Open(QString data,QObject* parent)
 
     if (fileInfo.isExecutable())
     {
-        QProcess process;
-        process.setWorkingDirectory(fileInfo.path());
+        QStringList arguments;
         if (!para.isEmpty())
         {
-            process.setArguments(para.split(" "));
+            arguments = para.split(" ");
         }
-        process.startDetached(exePath);
+        startLinuxProgram(exePath, arguments, fileInfo.path());
     }
     else
     {
