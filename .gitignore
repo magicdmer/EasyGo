@@ -53,4 +53,9 @@ compile_commands.json
 # QtCreator local machine specific files for imported projects
 *creator.user*
 
-*_qmlcache.qrc
+
+# Local build output (qmake shadow builds, QtCreator, clangd)
+/release/
+/debug/
+/build*/
+/.qtc_clangd/
