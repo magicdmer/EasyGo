@@ -8,7 +8,7 @@
 
 ThemePlugin::ThemePlugin()
 {
-    m_info.id = OPTION_PLUGIN_ID;
+    m_info.id = THEME_PLUGIN_ID;
     m_info.name = tr("EasyGo主题设置");
     m_info.keyword.append("/theme");
     m_info.pluginType = "c++";
